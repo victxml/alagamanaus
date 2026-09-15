@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AlagaManaus — sistema web georreferenciado para identificação, análise e classificação de pontos recorrentes de alagamento e descarte irregular de resíduos em Manaus." />
+  <title>AlagaManaus — Monitoramento Urbano</title>
+
+  <link rel="preconnect" href="https://unpkg.com">
+  <style>
+/* ===== main.css ===== */
+@import url("base.css");
+@import url("professional.css");
+
+
+/* ===== base.css ===== */
+:root {
+  --bg: #f5f8fb;
+  --surface: #ffffff;
+  --surface-2: #eef5f9;
+  --text: #173042;
+  --muted: #5d7180;
+  --primary: #0b5774;
+  --primary-dark: #083e54;
+  --accent: #1f7ea1;
+  --border: #d5e2e9;
+  --shadow: 0 14px 40px rgba(20, 55, 72, .10);
+
+  --critical: #b42318;
+  --high: #d35f00;
+  --medium: #a66b00;
+  --low: #16794a;
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --container: 1180px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+
+a { color: inherit; }
+button, input, select, textarea { font: inherit; }
+
+:focus-visible {
+  outline: 3px solid #ffbf47;
+  outline-offset: 3px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 9999;
+  background: #111;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  transform: translateY(-150%);
+  transition: transform .2s ease;
+}
+.skip-link:focus { transform: translateY(0); }
+
+.container {
+  width: min(var(--container), calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.narrow { width: min(860px, calc(100% - 32px)); }
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255,255,255,.96);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+
+.header-inner {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.brand-mark {
+  width: 42px; height: 42px;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 800;
+}
+
+.brand strong { display: block; font-size: 1.05rem; }
+.brand small { color: var(--muted); }
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.main-nav a {
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 650;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+  background: var(--surface-2);
+  color: var(--primary-dark);
+}
+
+.menu-toggle {
+  display: none;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.system-status {
+  background: #e9f7ef;
+  color: #145c38;
+  border-bottom: 1px solid #c8ead7;
+  font-size: .88rem;
+  text-align: center;
+  padding: 7px 12px;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #198754;
+  margin-right: 6px;
+}
+
+.page { display: none; }
+.active-page { display: block; }
+
+.hero {
+  padding: 68px 0;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(31,126,161,.13), transparent 32%),
+    linear-gradient(180deg, #fff 0%, #f5f8fb 100%);
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  gap: 54px;
+  align-items: center;
+}
+
+.eyebrow {
+  display: inline-block;
+  color: var(--accent);
+  font-weight: 800;
+  font-size: .82rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.hero h1,
+.section-heading h1,
+.section-heading h2 {
+  margin: 0;
+  line-height: 1.08;
+  letter-spacing: -.03em;
+}
+
+.hero h1 { font-size: clamp(2.5rem, 5vw, 4.75rem); }
+.hero p {
+  font-size: 1.12rem;
+  color: var(--muted);
+  max-width: 680px;
+}
+
+.hero-actions,
+.form-actions,
+.heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btn {
+  appearance: none;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-weight: 750;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+}
+
+.btn-primary {
+  color: #fff;
+  background: var(--primary);
+}
+.btn-primary:hover { background: var(--primary-dark); }
+
+.btn-secondary {
+  background: #fff;
+  color: var(--primary-dark);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: var(--surface-2); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+}
+
+.btn-full { width: 100%; }
+
+.trust-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  margin-top: 22px;
+  font-size: .92rem;
+}
+
+.hero-map-card,
+.form-card,
+.panel,
+.score-card,
+.factor-card,
+.profile-header-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius-lg);
+}
+
+.hero-map-card { overflow: hidden; }
+
+.mini-map {
+  height: 340px;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(120deg, rgba(16,92,120,.08), rgba(16,92,120,.02)),
+    repeating-linear-gradient(0deg, transparent 0 32px, rgba(30,60,75,.05) 33px 34px),
+    repeating-linear-gradient(90deg, transparent 0 38px, rgba(30,60,75,.05) 39px 40px),
+    #dcecf1;
+}
+
+.mini-road {
+  position: absolute;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.04);
+}
+.road-a { width: 120%; height: 12px; left: -10%; top: 48%; transform: rotate(-18deg); }
+.road-b { width: 12px; height: 120%; left: 56%; top: -10%; transform: rotate(20deg); }
+.road-c { width: 100%; height: 9px; left: 0; top: 70%; transform: rotate(7deg); }
+
+.mini-pin {
+  position: absolute;
+  width: 34px; height: 34px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 6px 12px rgba(0,0,0,.18);
+}
+.mini-pin::after { transform: rotate(45deg); }
+.pin-1 { left: 24%; top: 30%; }
+.pin-2 { left: 62%; top: 23%; }
+.pin-3 { left: 73%; top: 62%; }
+.pin-4 { left: 38%; top: 70%; }
+.critical { background: var(--critical); }
+.high { background: var(--high); }
+.medium { background: var(--medium); }
+.low { background: var(--low); }
+
+.mini-map-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px;
+}
+.mini-map-footer small { display: block; color: var(--muted); }
+.mini-map-footer a { color: var(--primary); font-weight: 750; text-decoration: none; }
+
+.section-block { padding: 54px 0; }
+.inner-block { padding-bottom: 0; }
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 26px;
+}
+.section-heading h1 { font-size: clamp(2rem, 4vw, 3.25rem); }
+.section-heading h2 { font-size: clamp(1.7rem, 3vw, 2.5rem); }
+.section-heading p { color: var(--muted); max-width: 520px; margin: 0; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+.stat-card strong { display: block; font-size: 2rem; margin-top: 8px; }
+.stat-card span:last-child { color: var(--muted); }
+.stat-icon { font-size: 1.4rem; }
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 18px;
+}
+.step-card {
+  border-left: 4px solid var(--accent);
+  background: var(--surface);
+  padding: 22px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  box-shadow: var(--shadow);
+}
+.step-number {
+  display: inline-grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--primary);
+  font-weight: 900;
+}
+.step-card h3 { margin-bottom: 6px; }
+.step-card p { color: var(--muted); margin-bottom: 0; }
+
+.map-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 18px;
+  min-height: 650px;
+}
+
+.filter-panel,
+.map-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.filter-panel {
+  padding: 20px;
+  height: fit-content;
+  position: sticky;
+  top: 112px;
+}
+
+.filter-panel label,
+.form-group label,
+.table-toolbar label {
+  display: block;
+  font-weight: 750;
+  margin: 14px 0 7px;
+}
+
+select, input, textarea {
+  width: 100%;
+  border: 1px solid #b9cbd5;
+  border-radius: 10px;
+  padding: 11px 12px;
+  background: #fff;
+  color: var(--text);
+}
+textarea { resize: vertical; }
+
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.panel-title-row h2, .panel-title-row h3 { margin: 0; }
+
+.link-button {
+  border: 0;
+  background: none;
+  color: var(--primary);
+  font-weight: 750;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.filter-result { margin: 12px 0; color: var(--muted); font-size: .92rem; }
+
+.legend-box {
+  margin-top: 18px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.legend-box h3 { margin: 0 0 10px; }
+.legend-box > div {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 9px 0;
+  font-size: .9rem;
+}
+.legend-dot {
+  flex: 0 0 14px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.15);
+}
+.legend-dot.critico { background: var(--critical); }
+.legend-dot.alto { background: var(--high); }
+.legend-dot.medio { background: var(--medium); }
+.legend-dot.baixo { background: var(--low); }
+
+.map-panel { overflow: hidden; position: relative; min-height: 650px; }
+#map { min-height: 650px; height: 100%; width: 100%; }
+.map-state {
+  position: absolute;
+  inset: 0;
+  z-index: 600;
+  background: rgba(255,255,255,.94);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 20px;
+}
+.map-state.error-state {
+  gap: 10px;
+  align-content: center;
+}
+.hidden { display: none !important; }
+
+.custom-marker {
+  width: 34px; height: 34px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 3px solid white;
+  display: grid; place-items: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,.3);
+}
+.custom-marker span {
+  transform: rotate(45deg);
+  color: #fff;
+  font-weight: 900;
+  font-size: .85rem;
+}
+
+.form-card { padding: 24px; }
+.form-progress {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.form-progress span {
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 9px 10px;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 750;
+  font-size: .9rem;
+}
+.form-progress .active { background: #d9eef5; color: var(--primary-dark); }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 18px;
+}
+.form-group.full { grid-column: 1 / -1; }
+.form-group small { color: var(--muted); }
+.inline-field { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.field-error {
+  color: #9c1c13;
+  font-size: .86rem;
+  min-height: 20px;
+  margin-top: 4px;
+}
+.field-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.invalid { border-color: var(--critical) !important; background: #fff6f5; }
+
+.review-box {
+  border: 1px dashed #9cbfce;
+  background: #f1f8fb;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 18px 0;
+}
+.review-box p { margin: 4px 0 0; color: var(--muted); }
+
+.success-card {
+  margin-top: 18px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border: 1px solid #b8dfca;
+  background: #edf9f2;
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.success-card h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.success-card p { margin: 0; color: #406553; }
+.success-icon {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: #1d7b4b;
+  color: #fff;
+  font-weight: 900;
+}
+
+.criticality-grid {
+  display: grid;
+  grid-template-columns: .9fr 1.1fr;
+  gap: 18px;
+}
+.score-card, .factor-card { padding: 24px; }
+.score-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.score-card h2 { margin: 0; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: .85rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.badge.critico { background: #fde7e5; color: #8c1710; }
+.badge.alto { background: #fff0e2; color: #9a4300; }
+.badge.medio { background: #fff4d6; color: #765000; }
+.badge.baixo { background: #e6f6ed; color: #12643d; }
+
+.score-ring {
+  margin: 24px auto;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  background:
+    radial-gradient(circle at center, #fff 60%, transparent 61%),
+    conic-gradient(var(--critical) 0 92%, #e8eef2 92% 100%);
+}
+.score-ring span { font-size: 3rem; font-weight: 900; line-height: 1; }
+.score-ring small { color: var(--muted); }
+
+.factor-card h2 { margin-top: 0; }
+.factor { margin: 18px 0; }
+.factor > div { display: flex; justify-content: space-between; margin-bottom: 6px; }
+progress {
+  width: 100%;
+  height: 14px;
+  border: 0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+progress::-webkit-progress-bar { background: #e8eef2; border-radius: 99px; }
+progress::-webkit-progress-value { background: var(--primary); border-radius: 99px; }
+progress::-moz-progress-bar { background: var(--primary); border-radius: 99px; }
+
+.note { color: var(--muted); display: block; margin-top: 18px; }
+
+.ranking-list { display: grid; gap: 10px; }
+.ranking-item {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+.rank-number {
+  width: 34px; height: 34px;
+  display: grid; place-items: center;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-weight: 900;
+}
+.ranking-item small { display: block; color: var(--muted); }
+
+.admin-summary {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.admin-summary > div {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.admin-summary small { display: block; color: var(--muted); }
+.admin-summary strong { font-size: 1.7rem; }
+
+.table-toolbar {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.table-toolbar label { margin: 0; }
+.table-toolbar input { max-width: 360px; }
+
+.table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+th, td {
+  text-align: left;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+th { background: #f2f7fa; font-size: .88rem; }
+td { font-size: .92rem; }
+.status-select { min-width: 150px; }
+
+.profile-header-card {
+  padding: 22px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.avatar {
+  width: 60px; height: 60px;
+  display: grid; place-items: center;
+  border-radius: 18px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.25rem;
+}
+.profile-header-card h1 { margin: 0; }
+.profile-header-card p { margin: 2px 0 0; color: var(--muted); }
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 18px;
+}
+.panel { padding: 20px; }
+
+.count-pill {
+  min-width: 28px; height: 28px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  display: grid; place-items: center;
+  font-weight: 800;
+}
+
+.timeline, .notifications-list { margin-top: 14px; }
+.timeline-item, .notification-item {
+  border-left: 3px solid var(--border);
+  padding: 4px 0 14px 14px;
+  margin-bottom: 12px;
+}
+.timeline-item h3, .notification-item h3 { margin: 0 0 4px; font-size: 1rem; }
+.timeline-item p, .notification-item p { margin: 0; color: var(--muted); font-size: .92rem; }
+.notification-item.unread { border-left-color: var(--accent); background: #f5fbfd; padding: 10px 12px; border-radius: 0 10px 10px 0; }
+
+.empty-state {
+  padding: 28px 14px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+}
+
+.site-footer {
+  margin-top: 50px;
+  background: #0f2d3c;
+  color: #e7f3f8;
+}
+.footer-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  padding: 28px 0;
+}
+.site-footer p { color: #b8cad3; margin: 4px 0 0; }
+
+.toast {
+  position: fixed;
+  z-index: 2000;
+  right: 20px;
+  bottom: 20px;
+  max-width: 360px;
+  background: #112f3e;
+  color: #fff;
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 980px) {
+  .main-nav {
+    display: none;
+    position: absolute;
+    top: 76px;
+    right: 16px;
+    left: 16px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .main-nav.open { display: flex; }
+  .menu-toggle { display: inline-flex; }
+  .hero-grid,
+  .criticality-grid,
+  .profile-grid,
+  .map-layout { grid-template-columns: 1fr; }
+  .filter-panel { position: static; }
+  .stats-grid, .admin-summary { grid-template-columns: repeat(2,1fr); }
+  .steps-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 680px) {
+  .container, .narrow { width: min(100% - 20px, var(--container)); }
+  .header-inner { min-height: 68px; }
+  .brand small { display: none; }
+  .main-nav { top: 68px; }
+  .hero { padding: 42px 0; }
+  .hero h1 { font-size: clamp(2.2rem, 12vw, 3.6rem); }
+  .mini-map { height: 260px; }
+  .section-block { padding: 38px 0; }
+  .section-heading { display: block; }
+  .section-heading p { margin-top: 10px; }
+  .stats-grid, .admin-summary { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .inline-field { grid-template-columns: 1fr; }
+  .form-progress { grid-template-columns: 1fr; }
+  .score-card-top { flex-direction: column; }
+  .ranking-item { grid-template-columns: 38px 1fr; }
+  .ranking-item .badge { grid-column: 2; justify-self: start; }
+  .footer-inner { grid-template-columns: 1fr; }
+  .table-toolbar { display: block; }
+  .table-toolbar input { max-width: none; margin-top: 8px; }
+}
+
+
+/* ===== professional.css ===== */
+/* AlagaManaus — linguagem visual 2.0. Sem fontes ou ícones remotos. */
+:root{--bg:#f5f7f8;--surface:#fff;--surface-2:#edf3f4;--text:#162f3e;--muted:#536675;--primary:#075b65;--primary-dark:#06434b;--accent:#076972;--border:#d9e2e6;--container:1240px;--shadow:0 6px 24px #142f3e06;--radius:12px;--radius-lg:16px;--high:#a8470b;--medium:#8a6300}
+body{font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);line-height:1.6}button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}button:disabled{opacity:.6;cursor:wait}h1,h2,h3{font-weight:650}h1,h2{letter-spacing:-.035em}p{color:var(--muted)}.container{width:min(var(--container),calc(100% - 72px))}.site-header{background:#fff;backdrop-filter:none}.header-inner{min-height:88px}.brand-mark{width:46px;height:46px;background:var(--primary);border-radius:12px}.brand strong{font-size:1.22rem;letter-spacing:-.035em}.brand small{font-size:.72rem}.main-nav{gap:3px}.main-nav a{font-size:.85rem;font-weight:600;padding:10px 12px;border-radius:6px}.main-nav a.active{background:#e8f2f1;color:#064e55}.main-nav a[data-route=registrar]{border:1px solid #cadbdd}.system-status{font-size:.73rem;letter-spacing:.02em;background:#edf3f4;color:#4a616d;border-bottom:1px solid var(--border);padding:7px 16px}.status-dot{background:#637d87;width:6px;height:6px}.hero{background:#fff;padding:0;overflow:hidden;border-bottom:1px solid var(--border)}.hero-grid{padding:70px 0 76px;gap:70px;grid-template-columns:1.08fr 1fr;align-items:center}.hero .eyebrow{font-size:.69rem;letter-spacing:.14em;margin-bottom:24px}.hero h1{font-size:clamp(2.8rem,4.2vw,4rem);line-height:1.08;letter-spacing:-.055em;font-weight:650;max-width:640px}.hero h1 em{font-style:normal;color:var(--primary)}.hero p{font-size:1rem;line-height:1.85;max-width:520px;margin:24px 0 28px}.hero-actions{gap:12px}.btn{font-size:.875rem;font-weight:650;border-radius:7px;min-height:46px;padding:12px 20px;box-shadow:none;transition:background .15s}.btn:hover{transform:none}.btn-primary{background:var(--primary)}.btn-secondary{background:#fff;border-color:#b9cbd1}.btn-ghost{border:1px solid var(--border)}.trust-row{font-size:.74rem;gap:10px;align-items:center;margin-top:25px}.trust-line{width:25px;height:1px;background:#679491}.intelligence-card{background:#102f40;color:#fff;border:0;border-radius:15px;padding:25px 28px;box-shadow:0 20px 50px #173d491c;position:relative}.intelligence-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#c0d5de;font-size:.62rem;letter-spacing:.1em}.demo-chip{padding:4px 8px;border:1px solid #54717d;border-radius:4px;font-size:.6rem;letter-spacing:.02em}.intelligence-title h2{font-size:1.65rem;line-height:1.2;margin:27px 0 8px;color:#fff}.hero .intelligence-title p{font-size:.8rem;color:#bdd0d9;margin:0 0 26px;line-height:1.6}.priority-spotlight{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:19px 0 24px;border-bottom:1px solid #395562}.priority-spotlight>div:first-child{display:grid;gap:8px;justify-items:start}.priority-spotlight strong{font-size:1rem}.light-label{font-size:.71rem;color:#bdd0d9}.priority-spotlight .badge{font-size:.66rem;background:#fbebdf;color:#873711;padding:4px 8px;border-radius:4px}.hero-score{flex:none;width:88px;height:88px;border:5px solid #60bab1;border-right-color:#355765;border-radius:50%;display:grid;place-content:center;text-align:center}.hero-score strong{font-size:1.7rem;line-height:1.1;color:#fff}.hero-score small{font-size:.65rem;color:#bdd0d9}.board-caption{display:flex;justify-content:space-between;font-size:.59rem;letter-spacing:.11em;color:#bdd0d9;margin:21px 0 4px}.board-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #395562;font-size:.78rem;gap:12px}.board-row a{text-decoration:none}.board-row a:hover{text-decoration:underline}.board-row small{display:block;color:#bdd0d9;font-size:.64rem}.board-row b{font-size:.9rem;font-weight:600}.board-link{display:flex;justify-content:space-between;padding-top:20px;font-size:.78rem;text-decoration:none;color:#a6e4db}.board-link span{font-size:1rem}.section-block{padding:45px 0}.section-heading{align-items:center;margin-bottom:24px}.eyebrow{font-size:.67rem;letter-spacing:.13em;font-weight:700}.section-heading h2{font-size:1.7rem}.section-heading h1{font-size:2.2rem}.section-heading p{font-size:.86rem;max-width:440px}.stats-grid{gap:16px}.stat-card{padding:23px;border-radius:10px;position:relative;box-shadow:none}.stat-icon{font-size:.68rem;font-weight:600;color:#607988;display:block}.stat-card strong{font-size:2.15rem;font-weight:600;letter-spacing:-.04em;margin:12px 0 1px;line-height:1.2}.stat-card #statNeighborhood{font-size:1.6rem;min-height:41px;display:flex;align-items:center}.stat-card span:last-child{font-size:.8rem}.stat-card:nth-child(2){border-top:3px solid #b42318;padding-top:21px}.step-card{border:1px solid var(--border);border-radius:10px;box-shadow:none;padding:25px;background:#fff}.step-number{background:none;color:var(--primary);font-size:.85rem;display:block;width:auto;height:auto;text-align:left}.step-number:before{content:'0'}.step-card h3{font-size:1.1rem;margin-top:20px}.step-card p{font-size:.85rem}.site-footer{margin-top:25px;background:#102f40}.footer-inner{padding:30px 0;align-items:center}.site-footer p{font-size:.75rem}.footer-links{display:flex;gap:20px;flex-wrap:wrap;font-size:.75rem;margin-bottom:8px}.footer-links a{text-decoration:none}.footer-links a:hover{text-decoration:underline}.map-layout{grid-template-columns:270px minmax(0,1fr);gap:20px;min-height:580px}.filter-panel{position:static;padding:22px}.panel-title-row h2{font-size:1.1rem}.filter-panel label{font-size:.8rem}.filter-panel .btn{margin-top:18px}.legend-box>div{font-size:.73rem}.map-panel,#map{min-height:580px}.filter-panel,.map-panel,.form-card,.panel,.score-card,.factor-card,.profile-header-card{border-radius:12px;box-shadow:none}.map-panel{background:#e9f0f0}.map-panel .map-state{z-index:800}.map-state.error-state strong{font-size:1.1rem}.map-state.error-state span{font-size:.85rem}.map-result-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}.occ-card{padding:20px;background:#fff;border:1px solid var(--border);border-radius:10px;min-width:0}.occ-card h3{font-size:1rem;margin:12px 0 5px}.occ-card h3 a{text-decoration:none}.occ-card h3 a:hover{text-decoration:underline}.occ-card p{font-size:.8rem;margin:4px 0}.occ-card .badge{font-size:.7rem}.badge{font-size:.75rem;font-weight:650;border-radius:5px;padding:5px 8px}.narrow{width:min(880px,calc(100% - 72px))}.form-card{padding:32px}.form-group label{font-size:.86rem}.form-group small,.field-meta{font-size:.76rem}.form-progress{border-bottom:1px solid var(--border);padding-bottom:20px;gap:12px}.form-progress span{font-size:.75rem;border-radius:5px;background:#f0f4f5}.form-progress .active{background:#e5f1ef;color:#075b65}input,select,textarea{border-radius:6px;font-size:.88rem;min-height:44px;border-color:#95a9b3}input::placeholder,textarea::placeholder{color:#667782}.review-box{background:#f0f5f6;border:1px solid #d9e2e6;border-radius:7px;font-size:.85rem}.form-actions{justify-content:flex-end}.coordinate-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.location-picker{height:240px;border:1px solid var(--border);border-radius:8px;margin-top:15px;background:#edf2f3;display:grid;place-items:center;color:var(--muted);font-size:.85rem;padding:0;overflow:hidden}.photo-preview{width:100%;max-height:250px;object-fit:contain;border-radius:8px;margin-top:12px}.score-card,.factor-card{padding:28px}.score-card h2{font-size:1.35rem}.factor-card h2{font-size:1.2rem}.factor{font-size:.86rem;margin:25px 0}progress{height:9px}.note{font-size:.76rem}.ranking-item{box-shadow:none;border-radius:7px;padding:18px}.ranking-item strong{font-size:.9rem}.ranking-item small{font-size:.75rem}.rank-number{font-size:.8rem;background:#eef3f5;border-radius:5px}.admin-summary>div{border-radius:8px;padding:22px}.admin-summary small{font-size:.78rem}.admin-summary strong{font-size:2rem;font-weight:600}.table-toolbar{margin:26px 0 16px}.table-toolbar label{font-size:.83rem}.table-wrap{border-radius:9px}th{font-size:.67rem;letter-spacing:.06em;text-transform:uppercase;background:#edf2f4;color:#4c6572}td{font-size:.8rem;padding:18px 14px}tbody tr:hover{background:#f6f9fa}.status-select{font-size:.76rem}.avatar{background:#e6f1ef;color:var(--primary);border-radius:50%;flex:none}.profile-header-card h1{font-size:1.8rem}.profile-header-card p{font-size:.82rem}.profile-header-card{padding:30px}.toast{max-width:min(420px,calc(100% - 32px));border-radius:8px;font-size:.88rem}.link-button{min-height:32px}.auth-card{max-width:520px;margin:30px auto}.auth-card label{display:block;margin:16px 0 6px;font-size:.85rem;font-weight:600}.auth-card .btn{margin-top:20px;width:100%}.auth-tabs{display:flex;gap:12px;margin:15px 0}.auth-tabs button{flex:1}.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.help-grid h2{font-size:1.2rem}.help-grid p{font-size:.88rem}.help-grid details{padding:15px 0;border-bottom:1px solid var(--border)}summary{cursor:pointer;font-weight:600}dialog{border:1px solid var(--border);border-radius:14px;padding:30px;max-width:560px;width:calc(100% - 32px);color:var(--text);max-height:85vh;overflow:auto}dialog::backdrop{background:#102f4099}dialog h2{margin-top:0}dialog p{overflow-wrap:anywhere}dialog .form-actions{margin-top:24px}.detail-summary{display:grid;grid-template-columns:2fr 1fr;gap:24px}.detail-summary h2{font-size:1.2rem}.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.swatch{border:1px solid var(--border);border-radius:8px;overflow:hidden}.swatch>span{height:90px;display:block}.swatch p{padding:0 12px;font-size:.8rem}.page h1:focus{outline:none}.offline-banner{color:#864511;background:#fff1db}.empty-state{grid-column:1/-1}.score-card p{font-size:.9rem}.mobile-label{display:none}
+@media(min-width:1600px){.hero-grid{padding:85px 0}.hero h1{font-size:4.2rem}}
+@media(max-width:1100px){.hero-grid{gap:36px}.main-nav a{padding:9px 8px}.brand small{display:none}.map-result-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:980px){.main-nav{top:88px}.main-nav a{padding:12px}.hero-grid{grid-template-columns:1fr 1fr;gap:30px;padding:50px 0}.hero h1{font-size:2.8rem}.intelligence-card{padding:22px}.hero-actions .btn{width:100%}.stats-grid{grid-template-columns:repeat(2,1fr)}.steps-grid{grid-template-columns:repeat(3,1fr);gap:12px}.map-layout,.criticality-grid,.profile-grid{grid-template-columns:1fr}.filter-panel{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px}.filter-panel>*{grid-column:1/-1}.filter-panel label{margin:6px 0 0}.map-panel,#map{min-height:450px}.filter-panel .legend-box{margin-top:0}.help-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.container,.narrow{width:calc(100% - 36px)}.header-inner{min-height:72px}.main-nav{top:72px}.hero-grid{grid-template-columns:1fr;gap:36px;padding:42px 0}.hero h1{font-size:clamp(2.5rem,9.2vw,3.7rem)}.hero .eyebrow{font-size:.6rem;margin-bottom:19px}.hero p{font-size:.92rem;margin:22px 0}.hero-actions .btn{width:auto;flex:1}.trust-row{font-size:.65rem}.intelligence-card{padding:22px}.hero .intelligence-title p{margin-bottom:14px}.section-block{padding:32px 0}.section-heading{display:block}.section-heading h1{font-size:1.85rem}.section-heading h2{font-size:1.5rem}.section-heading p{margin-top:10px}.stats-grid,.admin-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat-card{padding:16px}.stat-card:nth-child(2){padding-top:14px}.stat-card strong{font-size:1.8rem}.stat-card #statNeighborhood{font-size:1.2rem;min-height:34px}.stat-card span:last-child{font-size:.7rem}.steps-grid,.map-result-list,.detail-summary{grid-template-columns:1fr}.step-card{padding:22px}.form-card{padding:20px}.form-grid{grid-template-columns:1fr}.form-progress{grid-template-columns:repeat(3,1fr);gap:5px}.form-progress span{font-size:.63rem;padding:8px 3px}.inline-field{grid-template-columns:1fr}.form-actions .btn{flex:1}.coordinate-grid{gap:10px}.profile-header-card{padding:20px;align-items:flex-start}.profile-header-card h1{font-size:1.3rem}.profile-header-card p{font-size:.74rem}.footer-inner{grid-template-columns:1fr;gap:20px}.swatches{grid-template-columns:1fr 1fr}.panel-title-row{flex-wrap:wrap}.table-toolbar{display:block}.heading-actions{margin-top:18px}.toast{right:16px;bottom:16px}.score-card-top{flex-direction:column}.ranking-item{grid-template-columns:35px 1fr}.ranking-item .badge{grid-column:2}.form-group{min-width:0}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+.badge.pendente{background:#eaf0f3;color:#40586a}.link-button:hover{color:var(--primary-dark)}.hero-copy,.intelligence-card{min-width:0}.leaflet-popup-content p{font-size:.8rem}.auth-card small{display:block;font-size:.75rem;color:var(--muted)}.auth-card .auth-tabs .btn{margin-top:0}.form-progress span{color:#405c6a}
+
+/* Início: panorama e jornada — revisão visual 2.1, estilos restritos à home. */
+#page-home .home-panorama{padding:52px 0 36px}
+#page-home .home-panorama .section-heading{margin-bottom:24px;align-items:center}
+#page-home .home-panorama .section-heading h2{font-size:1.85rem}
+.sample-label{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid #d5e2e5;border-radius:20px;background:#edf3f4;font-size:.72rem;color:#526876;white-space:nowrap}
+.sample-label>span{width:6px;height:6px;border-radius:50%;background:#65818a}
+#page-home .overview-metrics{gap:16px}
+#page-home .overview-metrics .stat-card{position:relative;min-width:0;border:1px solid #d6e2e5;border-radius:14px;padding:24px 22px 22px;box-shadow:0 5px 18px #153c4904;overflow:hidden;background:#fff}
+#page-home .overview-metrics .stat-card::after{content:"";position:absolute;bottom:0;left:22px;right:22px;height:3px;background:var(--metric-accent);opacity:.8;border-radius:3px 3px 0 0}
+#page-home .metric-territory{--metric-accent:#136b78;--metric-soft:#e8f3f4}
+#page-home .overview-metrics .metric-attention{--metric-accent:#a93e31;--metric-soft:#f9eae6;background:linear-gradient(150deg,#fff 30%,#fcf4f1)}
+#page-home .metric-district{--metric-accent:#46668a;--metric-soft:#edf1f8}
+#page-home .metric-complete{--metric-accent:#2b715c;--metric-soft:#eaf4ef}
+.metric-heading{display:flex;gap:12px;align-items:center;min-height:42px}
+.metric-heading .metric-icon{display:grid;place-items:center;flex:none;width:42px;height:42px;background:var(--metric-soft);color:var(--metric-accent);border:1px solid #ffffff70;border-radius:11px}
+.metric-heading h3{font-size:.8rem;line-height:1.4;letter-spacing:0;font-weight:600;margin:0;color:#405b6a}
+#page-home .overview-metrics .metric-value{font-size:2.8rem;line-height:1.15;font-weight:600;letter-spacing:-.045em;color:#163647;margin:25px 0 9px;min-height:52px;display:flex;align-items:center}
+#page-home .overview-metrics #statNeighborhood{font-size:1.72rem;line-height:1.15;min-height:52px;overflow-wrap:anywhere;letter-spacing:-.035em}
+#page-home .overview-metrics .metric-attention .metric-value{color:#a1372d}
+#page-home .overview-metrics .metric-description{font-size:.7rem;line-height:1.6;color:#5c707c;margin:0;min-height:23px}
+.panorama-footnote{display:flex;justify-content:space-between;gap:20px;align-items:center;margin:18px 2px 0}
+.panorama-footnote p{font-size:.73rem;color:#617581;margin:0}
+.panorama-footnote a{display:inline-flex;align-items:center;gap:8px;flex:none;color:#075b65;font-size:.75rem;font-weight:650;text-decoration:none;min-height:36px}
+.panorama-footnote a svg{width:17px;height:17px}
+.panorama-footnote a:hover{text-decoration:underline}
+#page-home .home-process{margin-top:12px;margin-bottom:56px;padding:36px 40px 0;border-radius:18px;background:#102f40;color:#fff;position:relative;overflow:hidden}
+.process-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;padding-bottom:34px;border-bottom:1px solid #36515f}
+.process-intro .eyebrow{color:#9bdbd3;margin-bottom:12px;font-size:.65rem}
+.process-intro h2{font-size:2.15rem;line-height:1.15;letter-spacing:-.04em;margin:0;font-weight:600;color:#fff}
+.process-intro p{font-size:.88rem;line-height:1.8;color:#c0d2db;max-width:320px;margin:0 0 2px}
+.process-track{list-style:none;padding:32px 0 30px;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:44px}
+.process-step{min-width:0;position:relative}
+.process-node{display:flex;align-items:center;gap:12px;margin-bottom:24px;position:relative}
+.process-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:#1e4353;border:1px solid #40616d;color:#b1e7df;flex:none}
+.process-number{font-size:.73rem;letter-spacing:.07em;font-variant-numeric:tabular-nums;color:#bbced7;padding:4px;background:#102f40;z-index:1}
+.process-step:not(:last-child) .process-node::after{content:"";position:absolute;left:90px;right:-28px;top:24px;border-top:1px solid #4b6975}
+.process-step:not(:last-child) .process-node::before{content:"";position:absolute;right:-28px;top:21px;width:6px;height:6px;transform:rotate(-45deg);border-right:1px solid #72909c;border-bottom:1px solid #72909c}
+.process-tag{font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#a1c6cd}
+.process-step h3{font-size:1.25rem;letter-spacing:-.02em;color:#fff;margin:7px 0 10px;font-weight:600}
+.process-step p{font-size:.8rem;line-height:1.85;margin:0;color:#c0d2db;max-width:300px}
+.process-bottom{display:flex;justify-content:space-between;align-items:center;gap:20px;border-top:1px solid #36515f;padding:19px 0 21px}
+.process-bottom>span{font-size:.75rem;color:#c0d2db}
+.process-bottom a{display:inline-flex;align-items:center;gap:12px;min-height:36px;font-size:.8rem;font-weight:600;text-decoration:none;color:#b5ece2}
+.process-bottom a svg{width:18px;height:18px}.process-bottom a:hover{text-decoration:underline}
+@media(max-width:1100px){#page-home .overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.process-track{gap:28px}.process-step:not(:last-child) .process-node::after,.process-step:not(:last-child) .process-node::before{right:-17px}}
+@media(max-width:700px){#page-home .home-panorama{padding:32px 0 24px}#page-home .home-panorama .section-heading{display:flex;align-items:flex-start;gap:12px;flex-direction:column}#page-home .home-panorama .section-heading h2{font-size:1.6rem}.sample-label{font-size:.65rem}#page-home .overview-metrics{gap:12px}#page-home .overview-metrics .stat-card{padding:18px 15px 20px}.metric-heading{align-items:flex-start;flex-direction:column;gap:10px;min-height:81px}.metric-heading h3{font-size:.74rem}.metric-heading .metric-icon{width:36px;height:36px;border-radius:9px}.metric-heading svg{width:21px;height:21px}#page-home .overview-metrics .metric-value{font-size:2.15rem;margin:18px 0 8px;min-height:48px}#page-home .overview-metrics #statNeighborhood{font-size:1.27rem;min-height:48px}#page-home .overview-metrics .metric-description{font-size:.65rem}#page-home .overview-metrics .stat-card::after{left:15px;right:15px}.panorama-footnote{align-items:flex-start;gap:6px;flex-direction:column}.panorama-footnote p{font-size:.69rem;max-width:290px}#page-home .home-process{padding:27px 24px 0;border-radius:14px;margin-top:12px;margin-bottom:36px}.process-intro{display:block;padding-bottom:25px}.process-intro h2{font-size:1.9rem}.process-intro p{font-size:.8rem;margin-top:16px;max-width:100%}.process-track{grid-template-columns:1fr;gap:0;padding:6px 0 8px}.process-step{padding:24px 0 24px 65px;min-height:142px}.process-node{position:absolute;left:0;top:25px;display:flex;flex-direction:column;gap:7px;margin:0}.process-icon{width:44px;height:44px}.process-number{font-size:.65rem}.process-step:not(:last-child)::after{content:"";position:absolute;top:102px;left:22px;bottom:-13px;border-left:1px solid #4b6975}.process-step:not(:last-child) .process-node::before,.process-step:not(:last-child) .process-node::after{display:none}.process-tag{font-size:.55rem}.process-step h3{margin:6px 0 8px;font-size:1.15rem}.process-step p{font-size:.78rem}.process-bottom{flex-direction:column;align-items:flex-start;gap:5px;padding:17px 0 20px}}
+@media(max-width:359px){#page-home .overview-metrics{grid-template-columns:1fr}.metric-heading{min-height:0;flex-direction:row;align-items:center}#page-home .overview-metrics .metric-value{min-height:0}#page-home .overview-metrics #statNeighborhood{min-height:0}.process-step{padding-left:57px}}
+
+
+/* ===== responsive.css ===== */
+
+@media (max-width:980px){.hero-grid{min-height:auto;padding:58px 0}.hero-map-card{transform:none}.map-layout{grid-template-columns:1fr}.filter-panel{position:static}.stats-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:680px){.hero-grid{padding:44px 0}.hero h1{font-size:clamp(2.35rem,12vw,3.7rem)}.section-block{padding:42px 0}.stats-grid{grid-template-columns:1fr}.hero-actions .btn{width:100%}.form-card{padding:20px}.map-panel,#map{min-height:560px}}
+
+</style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Pular para o conteúdo principal</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#home" aria-label="AlagaManaus - Página inicial">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3C13 8 7 13 7 18a9 9 0 0 0 18 0C25 13 19 8 16 3Z"/><path d="M8 19q4-4 8 0t8 0M10 24q3-3 6 0t6 0"/></svg></span>
+        <span>
+          <strong>AlagaManaus</strong>
+          <small>Inteligência urbana colaborativa</small>
+        </span>
+      </a>
+
+      <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mainNav">
+        <span>Menu</span>
+        <span class="sr-only">Abrir menu</span>
+      </button>
+
+      <nav id="mainNav" class="main-nav" aria-label="Navegação principal">
+        <a href="#home" data-route="home">Início</a>
+        <a href="#mapa" data-route="mapa">Mapa</a>
+        <a href="#registrar" data-route="registrar">Registrar ocorrência</a>
+        <a href="#criticidade" data-route="criticidade">Criticidade</a>
+        <a href="#gestao" data-route="gestao">Gestão</a>
+        <a href="#perfil" data-route="perfil">Perfil</a>
+      </nav>
+    </div>
+  </header>
+
+  <div id="systemStatus" class="system-status" role="status" aria-live="polite">
+    <span class="status-dot" aria-hidden="true"></span>
+    Ambiente de demonstração · registros fictícios para avaliação acadêmica
+  </div>
+
+  <main id="main-content" tabindex="-1">
+
+    <!-- HOME -->
+    <section id="page-home" class="page active-page" aria-labelledby="homeTitle">
+      <div class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <span class="eyebrow">TERRITÓRIO CONECTADO · MANAUS, AM</span>
+            <h1 id="homeTitle">Uma cidade mais preparada começa com <em>informação.</em></h1>
+            <p>
+              Identifique alagamentos e descarte irregular de resíduos. Acompanhe o que acontece no seu bairro e ajude a direcionar atenção para onde ela é mais necessária.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#registrar">Registrar ocorrência</a>
+              <a class="btn btn-secondary" href="#mapa">Ver mapa completo</a>
+            </div>
+
+            <div class="trust-row"><span class="trust-line"></span><span>Participação cidadã. Decisões orientadas por dados.</span></div>
+          </div>
+
+          <div class="hero-map-card intelligence-card" aria-label="Resumo de prioridades demonstrativas">
+            <div class="intelligence-top"><span>OBSERVATÓRIO URBANO</span><span class="demo-chip">Demonstração</span></div>
+            <div class="intelligence-title"><h2>O território em perspectiva.</h2><p>Cada registro ajuda a compreender o próximo passo.</p></div>
+            <div class="priority-spotlight"><div><span class="light-label">Maior índice na amostra</span><strong id="heroPriorityName">Av. Torquato Tapajós</strong><span class="badge critico">Prioridade crítica</span></div><div class="hero-score"><strong>92</strong><small>de 100</small></div></div>
+            <div class="board-caption"><span>ATENÇÃO PRIORITÁRIA</span><span>ÍNDICE</span></div><div id="homePriorities"></div>
+            <a class="board-link" href="#mapa">Explorar ocorrências no mapa <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="container home-panorama" aria-labelledby="panoramaTitle">
+        <div class="section-heading">
+          <div><span class="eyebrow">Panorama do território</span><h2 id="panoramaTitle">Indicadores gerais</h2></div>
+          <span class="sample-label"><span aria-hidden="true"></span>Dados demonstrativos</span>
+        </div>
+        <div class="stats-grid overview-metrics">
+          <article class="stat-card metric-territory">
+            <div class="metric-heading"><span class="metric-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15M15 6v15"/></svg></span><h3>Pontos mapeados</h3></div>
+            <strong id="statTotal" class="metric-value">0</strong>
+            <p class="metric-description">Registros presentes no mapa</p>
+          </article>
+          <article class="stat-card metric-attention">
+            <div class="metric-heading"><span class="metric-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 10 18H2Z"/><path d="M12 9v5M12 17h.01"/></svg></span><h3>Pontos críticos</h3></div>
+            <strong id="statCritical" class="metric-value">0</strong>
+            <p class="metric-description">Locais que exigem maior atenção</p>
+          </article>
+          <article class="stat-card metric-district">
+            <div class="metric-heading"><span class="metric-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><h3>Bairro mais afetado</h3></div>
+            <strong id="statNeighborhood" class="metric-value">—</strong>
+            <p class="metric-description">Maior concentração de registros</p>
+          </article>
+          <article class="stat-card metric-complete">
+            <div class="metric-heading"><span class="metric-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></span><h3>Ocorrências resolvidas</h3></div>
+            <strong id="statResolved" class="metric-value">0</strong>
+            <p class="metric-description">Atendimentos marcados como concluídos</p>
+          </article>
+        </div>
+        <div class="panorama-footnote"><p>Uma visão da amostra para acompanhar o território e suas prioridades.</p><a href="#mapa">Explorar o mapa <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></a></div>
+      </div>
+
+      <div class="container home-process" aria-labelledby="processTitle">
+        <div class="process-intro"><div><span class="eyebrow">Como funciona</span><h2 id="processTitle">Do registro<br>à priorização.</h2></div><p>Informação que conecta a participação cidadã à atenção ao território.</p></div>
+        <ol class="process-track">
+          <li class="process-step"><div class="process-node"><span class="process-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-8"/><path d="m17 3 4 4-10 10-5 1 1-5Z"/></svg></span><span class="process-number">01</span></div><span class="process-tag">Participação cidadã</span><h3>Registre</h3><p>Informe a localização, descreva o problema e acrescente uma foto da ocorrência.</p></li>
+          <li class="process-step"><div class="process-node"><span class="process-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 15v-4M13 15V7M18 15v-7"/></svg></span><span class="process-number">02</span></div><span class="process-tag">Análise do território</span><h3>Classifique</h3><p>A análise considera recorrência, gravidade e população potencialmente afetada.</p></li>
+          <li class="process-step"><div class="process-node"><span class="process-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 10 5-10 5L2 8ZM2 12l10 5 10-5M2 16l10 5 10-5"/></svg></span><span class="process-number">03</span></div><span class="process-tag">Acompanhamento</span><h3>Priorize</h3><p>Gestores consultam os pontos de maior atenção e acompanham o atendimento.</p></li>
+        </ol>
+        <div class="process-bottom"><span>Seu registro é o primeiro passo.</span><a href="#registrar">Registrar uma ocorrência <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></a></div>
+      </div>
+    </section>
+
+    <!-- MAPA -->
+    <section id="page-mapa" class="page" aria-labelledby="mapTitle">
+      <div class="container section-block">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Explorar o território</span>
+            <h1 id="mapTitle">Mapa interativo de ocorrências</h1>
+          </div>
+          <p>Encontre registros por bairro, período e prioridade. Consulte também a lista abaixo do mapa.</p>
+        </div>
+
+        <div class="map-layout">
+          <aside class="filter-panel" aria-label="Filtros do mapa">
+            <div class="panel-title-row">
+              <h2>Filtros</h2>
+              <button class="link-button" id="clearFilters">Limpar</button>
+            </div>
+
+            <label for="filterNeighborhood">Bairro</label>
+            <select id="filterNeighborhood">
+              <option value="">Todos os bairros</option>
+            </select>
+
+            <label for="filterType">Tipo de ocorrência</label>
+            <select id="filterType">
+              <option value="">Todos os tipos</option>
+              <option value="alagamento">Alagamento</option>
+              <option value="residuo">Descarte irregular de resíduos</option>
+            </select>
+
+            <label for="filterCriticality">Nível de criticidade</label>
+            <select id="filterCriticality">
+              <option value="">Todos os níveis</option>
+              <option value="critico">Crítico</option>
+              <option value="alto">Alto</option>
+              <option value="medio">Médio</option>
+              <option value="baixo">Baixo</option>
+            </select>
+
+            <label for="filterPeriod">Período</label>
+            <select id="filterPeriod">
+              <option value="">Todo o período</option>
+              <option value="7">Últimos 7 dias</option>
+              <option value="30">Últimos 30 dias</option>
+              <option value="90">Últimos 90 dias</option>
+            </select>
+
+            <button class="btn btn-primary btn-full" id="applyFilters">Aplicar filtros</button>
+            <div class="filter-result" id="filterResult" role="status" aria-live="polite"></div>
+
+            <div class="legend-box" aria-label="Legenda de criticidade">
+              <h3>Legenda</h3>
+              <div><span class="legend-dot critico"></span><span><strong>Crítico</strong> — ação imediata</span></div>
+              <div><span class="legend-dot alto"></span><span><strong>Alto</strong> — alta prioridade</span></div>
+              <div><span class="legend-dot medio"></span><span><strong>Médio</strong> — atenção</span></div>
+              <div><span class="legend-dot baixo"></span><span><strong>Baixo</strong> — monitoramento</span></div>
+            </div>
+          </aside>
+
+          <div class="map-panel">
+            <div id="mapLoading" class="map-state" role="status">Carregando mapa…</div>
+            <div id="mapError" class="map-state error-state hidden" role="alert">
+              <strong>Não foi possível carregar o mapa.</strong>
+              <span>Verifique sua conexão com a internet e tente novamente.</span>
+              <button class="btn btn-secondary" id="retryMap">Tentar novamente</button>
+            </div>
+            <div id="map" aria-label="Mapa de Manaus com ocorrências georreferenciadas"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REGISTRO -->
+    <section id="page-registrar" class="page" aria-labelledby="registerTitle">
+      <div class="container section-block narrow">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Participação cidadã</span>
+            <h1 id="registerTitle">Registrar nova ocorrência</h1>
+          </div>
+          <p>Conte o que aconteceu. Os campos com asterisco são obrigatórios.</p>
+        </div>
+
+        <form id="occurrenceForm" class="form-card" novalidate>
+          <div class="form-progress" aria-label="Informações necessárias">
+            <span class="active">1 · Localização</span>
+            <span>2 · Detalhes</span>
+            <span>3 · Revisão</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group full">
+              <label for="locationText">Localização <span aria-hidden="true">*</span></label>
+              <div class="inline-field">
+                <input id="locationText" name="locationText" type="text" placeholder="Ex.: Av. Brasil, Compensa" required />
+                <button class="btn btn-secondary" type="button" id="geoButton">Usar minha localização</button>
+              </div>
+              <small id="locationHelp">Informe as coordenadas ou selecione o ponto no mapa abaixo. A localização nunca será sorteada.</small>
+              <div class="field-error" id="locationError"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="occurrenceType">Tipo de ocorrência <span aria-hidden="true">*</span></label>
+              <select id="occurrenceType" name="occurrenceType" required>
+                <option value="">Selecione</option>
+                <option value="alagamento">Alagamento</option>
+                <option value="residuo">Descarte irregular de resíduos</option>
+              </select>
+              <div class="field-error" id="typeError"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="occurrenceNeighborhood">Bairro <span aria-hidden="true">*</span></label>
+              <input id="occurrenceNeighborhood" name="occurrenceNeighborhood" type="text" placeholder="Ex.: Cidade Nova" required />
+              <div class="field-error" id="neighborhoodError"></div>
+            </div>
+
+            <div class="form-group full">
+              <label for="occurrencePhoto">Foto da ocorrência</label>
+              <input id="occurrencePhoto" name="occurrencePhoto" type="file" accept="image/*" />
+              <small>Formatos de imagem comuns são aceitos. No protótipo, o arquivo não é enviado a um servidor.</small>
+            </div>
+
+            <div class="form-group full">
+              <label for="occurrenceDescription">Descrição <span aria-hidden="true">*</span></label>
+              <textarea id="occurrenceDescription" name="occurrenceDescription" rows="5"
+                        placeholder="Explique o que está acontecendo e como isso afeta o local." required minlength="10"></textarea>
+              <div class="field-meta">
+                <small>Mínimo de 10 caracteres.</small>
+                <small><span id="descriptionCount">0</span> caracteres</small>
+              </div>
+              <div class="field-error" id="descriptionError"></div>
+            </div>
+          </div>
+
+          <div class="review-box">
+            <strong>Antes de enviar</strong>
+            <p>Revise os dados. Você pode corrigir ou cancelar o registro sem perder o controle da navegação.</p>
+          </div>
+
+          <div class="form-actions">
+            <button type="reset" class="btn btn-ghost">Cancelar / limpar</button>
+            <button type="submit" class="btn btn-primary">Revisar ocorrência</button>
+          </div>
+        </form>
+
+        <div id="successMessage" class="success-card hidden" role="status" aria-live="polite">
+          <span class="success-icon" aria-hidden="true">✓</span>
+          <div>
+            <h2>Ocorrência registrada com sucesso</h2>
+            <p>O registro foi salvo neste navegador. <a href="#perfil">Acompanhar no meu perfil</a>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRITICIDADE -->
+    <section id="page-criticidade" class="page" aria-labelledby="criticalityTitle">
+      <div class="container section-block">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Análise e priorização</span>
+            <h1 id="criticalityTitle">Painel de criticidade</h1>
+          </div>
+          <p>Entenda os fatores de atenção e compare a criticidade dos bairros da amostra.</p>
+        </div>
+
+        <div class="criticality-grid">
+          <article class="score-card">
+            <div class="score-card-top">
+              <div>
+                <span class="eyebrow">Ponto selecionado</span>
+                <h2 id="criticalityPointName">Av. Torquato Tapajós</h2>
+              </div>
+              <span class="badge critico" id="criticalityBadge">Crítico</span>
+            </div>
+
+            <div class="score-ring" aria-label="Índice de criticidade 92 de 100">
+              <span id="criticalityScore">92</span>
+              <small>/ 100</small>
+            </div>
+
+            <p id="criticalityExplanation">
+              Prioridade máxima: alta recorrência, impacto severo e grande população potencialmente afetada.
+            </p>
+          </article>
+
+          <article class="factor-card">
+            <h2>Como o índice é formado</h2>
+            <div class="factor">
+              <div><span>Recorrência</span><strong>95%</strong></div>
+              <progress max="100" value="95">95%</progress>
+            </div>
+            <div class="factor">
+              <div><span>Gravidade</span><strong>90%</strong></div>
+              <progress max="100" value="90">90%</progress>
+            </div>
+            <div class="factor">
+              <div><span>População afetada</span><strong>88%</strong></div>
+              <progress max="100" value="88">88%</progress>
+            </div>
+            <small class="note">
+              Critérios demonstrativos. Ajuste os pesos e regras conforme o índice validado no pré-projeto.
+            </small>
+          </article>
+        </div>
+
+        <div class="section-block inner-block">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Ranking</span>
+              <h2>Bairros com maior criticidade</h2>
+            </div>
+          </div>
+
+          <div class="ranking-list" id="rankingList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GESTÃO -->
+    <section id="page-gestao" class="page" aria-labelledby="managementTitle">
+      <div class="container section-block">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Gestão pública</span>
+            <h1 id="managementTitle">Painel administrativo</h1>
+          </div>
+          <div class="heading-actions">
+            <button class="btn btn-secondary" id="exportCsv">Exportar relatório CSV</button>
+          </div>
+        </div>
+
+        <div class="admin-summary">
+          <div><small>Pontos prioritários</small><strong id="adminPriority">0</strong></div>
+          <div><small>Em análise</small><strong id="adminAnalysis">0</strong></div>
+          <div><small>Em atendimento</small><strong id="adminService">0</strong></div>
+          <div><small>Resolvidos</small><strong id="adminResolved">0</strong></div>
+        </div>
+
+        <div class="table-toolbar">
+          <label for="adminSearch">Buscar ponto</label>
+          <input id="adminSearch" type="search" placeholder="Digite bairro ou local" />
+        </div>
+
+        <div class="table-wrap" tabindex="0" aria-label="Tabela de pontos priorizados">
+          <table>
+            <thead>
+              <tr>
+                <th>Prioridade</th>
+                <th>Local</th>
+                <th>Bairro</th>
+                <th>Tipo</th>
+                <th>Criticidade</th>
+                <th>Status</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PERFIL -->
+    <section id="page-perfil" class="page" aria-labelledby="profileTitle">
+      <div class="container section-block">
+        <div class="profile-header-card">
+          <div class="avatar" aria-hidden="true">JR</div>
+          <div>
+            <span class="eyebrow">Perfil cidadão</span>
+            <h1 id="profileTitle">Usuário demonstrativo</h1>
+            <p>Manaus, AM · histórico salvo localmente neste navegador</p>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <section class="panel">
+            <div class="panel-title-row">
+              <h2>Minhas ocorrências</h2>
+              <span id="profileCount" class="count-pill">0</span>
+            </div>
+            <div id="profileOccurrences" class="timeline"></div>
+          </section>
+
+          <aside class="panel">
+            <div class="panel-title-row">
+              <h2>Notificações</h2>
+              <button class="link-button" id="markRead">Marcar como lidas</button>
+            </div>
+            <div id="notificationsList" class="notifications-list"></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>AlagaManaus</strong>
+        <p>Protótipo acadêmico de UX/UI · Sistemas de Informação</p>
+      </div>
+      <div>
+        <div class="footer-links"><a href="#ajuda">Ajuda e acessibilidade</a><a href="#design">Guia visual</a><a href="#login">Acessar demonstração</a></div><p>CEUNI FAMETRO · Sistemas de Informação</p>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script>
+// ===== data.js =====
+const ALAGA_DATA = [
+  {
+    id: 1,
+    title: "Av. Torquato Tapajós",
+    neighborhood: "Flores",
+    type: "alagamento",
+    criticality: "critico",
+    score: 92,
+    lat: -3.0633,
+    lng: -60.0171,
+    date: "2026-09-05",
+    status: "em_atendimento",
+    description: "Ponto recorrente com forte acúmulo de água em períodos de chuva intensa."
+  },
+  {
+    id: 2,
+    title: "Av. Brasil",
+    neighborhood: "Compensa",
+    type: "alagamento",
+    criticality: "alto",
+    score: 81,
+    lat: -3.1139,
+    lng: -60.0666,
+    date: "2026-09-03",
+    status: "em_analise",
+    description: "Trecho com drenagem insuficiente e impacto no fluxo de veículos."
+  },
+  {
+    id: 3,
+    title: "Av. Max Teixeira",
+    neighborhood: "Cidade Nova",
+    type: "residuo",
+    criticality: "medio",
+    score: 64,
+    lat: -3.0326,
+    lng: -59.9854,
+    date: "2026-08-27",
+    status: "em_analise",
+    description: "Acúmulo frequente de resíduos próximo a área de circulação."
+  },
+  {
+    id: 4,
+    title: "Rua do Comércio",
+    neighborhood: "Jorge Teixeira",
+    type: "residuo",
+    criticality: "alto",
+    score: 78,
+    lat: -3.0590,
+    lng: -59.9395,
+    date: "2026-08-20",
+    status: "em_atendimento",
+    description: "Descarte irregular próximo a igarapé, com risco de obstrução."
+  },
+  {
+    id: 5,
+    title: "Av. Autaz Mirim",
+    neighborhood: "São José Operário",
+    type: "alagamento",
+    criticality: "critico",
+    score: 89,
+    lat: -3.0782,
+    lng: -59.9399,
+    date: "2026-09-06",
+    status: "em_analise",
+    description: "Alagamento recorrente com impacto em residências e acesso local."
+  },
+  {
+    id: 6,
+    title: "Av. Djalma Batista",
+    neighborhood: "Chapada",
+    type: "alagamento",
+    criticality: "medio",
+    score: 58,
+    lat: -3.1028,
+    lng: -60.0262,
+    date: "2026-07-14",
+    status: "resolvido",
+    description: "Ocorrência pontual com intervenção concluída."
+  },
+  {
+    id: 7,
+    title: "Rua Principal",
+    neighborhood: "Redenção",
+    type: "residuo",
+    criticality: "baixo",
+    score: 34,
+    lat: -3.0721,
+    lng: -60.0398,
+    date: "2026-08-30",
+    status: "resolvido",
+    description: "Ponto de descarte irregular de menor impacto, já atendido."
+  },
+  {
+    id: 8,
+    title: "Av. Noel Nutels",
+    neighborhood: "Cidade Nova",
+    type: "alagamento",
+    criticality: "alto",
+    score: 76,
+    lat: -3.0199,
+    lng: -59.9935,
+    date: "2026-09-01",
+    status: "em_atendimento",
+    description: "Trecho com recorrência moderada e interrupção parcial de tráfego."
+  }
+];
+
+const CRITICALITY_LABELS = {
+  critico: { label: "Crítico", icon: "!" },
+  alto: { label: "Alto", icon: "!" },
+  medio: { label: "Médio", icon: "●" },
+  baixo: { label: "Baixo", icon: "✓" }
+};
+
+const STATUS_LABELS = {
+  em_analise: "Em análise",
+  em_atendimento: "Em atendimento",
+  resolvido: "Resolvido"
+};
+
+
+// ===== app.js =====
+let map;
+let markersLayer;
+let currentMapData = [...ALAGA_DATA];
+
+document.addEventListener("DOMContentLoaded", () => {
+  setupNavigation();
+  setupMobileMenu();
+  renderHomeStats();
+  populateNeighborhoods();
+  setupMapControls();
+  setupOccurrenceForm();
+  renderCriticality();
+  renderAdminTable(getAllOccurrences());
+  renderProfile();
+  setupAdminControls();
+  setupNotifications();
+  routeTo(location.hash.replace("#", "") || "home");
+
+  window.addEventListener("hashchange", () => {
+    routeTo(location.hash.replace("#", "") || "home");
+  });
+});
+
+function setupNavigation() {
+  document.querySelectorAll("[data-route]").forEach(link => {
+    link.addEventListener("click", () => {
+      document.getElementById("mainNav").classList.remove("open");
+      document.getElementById("menuToggle").setAttribute("aria-expanded", "false");
+    });
+  });
+}
+
+function routeTo(route) {
+  const valid = ["home","mapa","registrar","criticidade","gestao","perfil"];
+  if (!valid.includes(route)) route = "home";
+
+  document.querySelectorAll(".page").forEach(page => page.classList.remove("active-page"));
+  document.getElementById(`page-${route}`).classList.add("active-page");
+
+  document.querySelectorAll("[data-route]").forEach(link => {
+    link.classList.toggle("active", link.dataset.route === route);
+    if (link.dataset.route === route) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
+
+  window.scrollTo({ top: 0, behavior: "instant" });
+
+  if (route === "mapa") {
+    setTimeout(() => initMap(), 80);
+  }
+
+  document.getElementById("main-content").focus({ preventScroll: true });
+}
+
+function setupMobileMenu() {
+  const btn = document.getElementById("menuToggle");
+  const nav = document.getElementById("mainNav");
+  btn.addEventListener("click", () => {
+    const isOpen = nav.classList.toggle("open");
+    btn.setAttribute("aria-expanded", String(isOpen));
+  });
+}
+
+function renderHomeStats() {
+  const data = getAllOccurrences();
+  document.getElementById("statTotal").textContent = data.length;
+  document.getElementById("statCritical").textContent = data.filter(x => x.criticality === "critico").length;
+  document.getElementById("statResolved").textContent = data.filter(x => x.status === "resolvido").length;
+
+  const counts = {};
+  data.forEach(item => counts[item.neighborhood] = (counts[item.neighborhood] || 0) + 1);
+  const topNeighborhood = Object.entries(counts).sort((a,b) => b[1] - a[1])[0]?.[0] || "—";
+  document.getElementById("statNeighborhood").textContent = topNeighborhood;
+}
+
+function getStoredOccurrences() {
+  try {
+    return JSON.parse(localStorage.getItem("alagaManausOccurrences") || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function getAllOccurrences() {
+  return [...ALAGA_DATA, ...getStoredOccurrences()];
+}
+
+function populateNeighborhoods() {
+  const select = document.getElementById("filterNeighborhood");
+  const neighborhoods = [...new Set(getAllOccurrences().map(x => x.neighborhood))].sort((a,b) => a.localeCompare(b));
+  neighborhoods.forEach(n => {
+    const option = document.createElement("option");
+    option.value = n;
+    option.textContent = n;
+    select.appendChild(option);
+  });
+}
+
+function initMap() {
+  const loading = document.getElementById("mapLoading");
+  const error = document.getElementById("mapError");
+
+  if (typeof L === "undefined") {
+    loading.classList.add("hidden");
+    error.classList.remove("hidden");
+    return;
+  }
+
+  error.classList.add("hidden");
+
+  if (!map) {
+    map = L.map("map", { keyboard: true }).setView([-3.0937, -60.0212], 12);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors"
+    }).on("tileerror", () => { loading.classList.add("hidden"); error.classList.remove("hidden"); }).addTo(map);
+
+    markersLayer = L.layerGroup().addTo(map);
+    renderMapMarkers(currentMapData);
+  } else {
+    map.invalidateSize();
+  }
+
+  loading.classList.add("hidden");
+}
+
+function colorForCriticality(level) {
+  return {
+    critico: "#b42318",
+    alto: "#d35f00",
+    medio: "#a66b00",
+    baixo: "#16794a"
+  }[level] || "#0b5774";
+}
+
+function renderMapMarkers(data) {
+  if (!markersLayer) return;
+  markersLayer.clearLayers();
+
+  data.forEach(item => {
+    const iconMeta = CRITICALITY_LABELS[item.criticality] || CRITICALITY_LABELS.baixo;
+    const icon = L.divIcon({
+      className: "",
+      html: `<div class="custom-marker" style="background:${colorForCriticality(item.criticality)}"><span>${iconMeta.icon}</span></div>`,
+      iconSize: [34, 34],
+      iconAnchor: [17, 34],
+      popupAnchor: [0, -32]
+    });
+
+    const marker = L.marker([item.lat, item.lng], {
+      icon,
+      title: `${item.title} — ${iconMeta.label}`
+    });
+
+    marker.bindPopup(`
+      <div style="min-width:220px">
+        <strong>${escapeHtml(item.title)}</strong><br>
+        <span>${escapeHtml(item.neighborhood)}</span><br>
+        <span>${iconMeta.icon} <strong>${iconMeta.label}</strong> · índice ${item.score}</span><br>
+        <span>Status: ${STATUS_LABELS[item.status] || item.status}</span><br>
+        <small>${escapeHtml(item.description || "")}</small>
+      </div>
+    `);
+    marker.addTo(markersLayer);
+  });
+
+  if (data.length && map) {
+    const bounds = L.latLngBounds(data.map(item => [item.lat, item.lng]));
+    map.fitBounds(bounds.pad(.16), { maxZoom: 14 });
+  }
+}
+
+function setupMapControls() {
+  document.getElementById("applyFilters").addEventListener("click", applyFilters);
+  document.getElementById("clearFilters").addEventListener("click", () => {
+    ["filterNeighborhood","filterType","filterCriticality","filterPeriod"].forEach(id => {
+      document.getElementById(id).value = "";
+    });
+    currentMapData = getAllOccurrences();
+    renderMapMarkers(currentMapData);
+    document.getElementById("filterResult").textContent = `${currentMapData.length} ponto(s) exibido(s).`;
+  });
+
+  document.getElementById("retryMap").addEventListener("click", () => {
+    document.getElementById("mapError").classList.add("hidden");
+    document.getElementById("mapLoading").classList.remove("hidden");
+    setTimeout(initMap, 250);
+  });
+}
+
+function applyFilters() {
+  const neighborhood = document.getElementById("filterNeighborhood").value;
+  const type = document.getElementById("filterType").value;
+  const criticality = document.getElementById("filterCriticality").value;
+  const period = document.getElementById("filterPeriod").value;
+
+  const now = new Date("2026-09-07T12:00:00");
+
+  currentMapData = getAllOccurrences().filter(item => {
+    if (neighborhood && item.neighborhood !== neighborhood) return false;
+    if (type && item.type !== type) return false;
+    if (criticality && item.criticality !== criticality) return false;
+    if (period) {
+      const days = Number(period);
+      const diff = (now - new Date(item.date + "T12:00:00")) / 86400000;
+      if (diff > days) return false;
+    }
+    return true;
+  });
+
+  renderMapMarkers(currentMapData);
+  document.getElementById("filterResult").textContent = currentMapData.length
+    ? `${currentMapData.length} ponto(s) encontrado(s).`
+    : "Nenhum ponto corresponde aos filtros. Tente remover algum filtro.";
+}
+
+function setupOccurrenceForm() {
+  const form = document.getElementById("occurrenceForm");
+  const description = document.getElementById("occurrenceDescription");
+  description.addEventListener("input", () => {
+    document.getElementById("descriptionCount").textContent = description.value.length;
+    validateField(description);
+  });
+
+  ["locationText","occurrenceType","occurrenceNeighborhood"].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener("input", () => validateField(el));
+    el.addEventListener("change", () => validateField(el));
+  });
+
+  document.getElementById("geoButton").addEventListener("click", useGeolocation);
+
+  form.addEventListener("reset", () => {
+    setTimeout(() => {
+      clearErrors();
+      document.getElementById("descriptionCount").textContent = "0";
+      document.getElementById("successMessage").classList.add("hidden");
+    }, 0);
+  });
+
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    clearErrors();
+
+    const fields = [
+      document.getElementById("locationText"),
+      document.getElementById("occurrenceType"),
+      document.getElementById("occurrenceNeighborhood"),
+      document.getElementById("occurrenceDescription")
+    ];
+
+    const invalid = fields.filter(field => !validateField(field));
+    if (invalid.length) {
+      invalid[0].focus();
+      showToast("Há campos que precisam ser corrigidos antes do envio.");
+      return;
+    }
+
+    const newItem = {
+      id: Date.now(),
+      title: document.getElementById("locationText").value.trim(),
+      neighborhood: document.getElementById("occurrenceNeighborhood").value.trim(),
+      type: document.getElementById("occurrenceType").value,
+      criticality: "medio",
+      score: 55,
+      lat: -3.0937 + (Math.random() - .5) * .06,
+      lng: -60.0212 + (Math.random() - .5) * .06,
+      date: new Date().toISOString().slice(0,10),
+      status: "em_analise",
+      description: document.getElementById("occurrenceDescription").value.trim(),
+      userCreated: true
+    };
+
+    const stored = getStoredOccurrences();
+    stored.unshift(newItem);
+    localStorage.setItem("alagaManausOccurrences", JSON.stringify(stored));
+
+    document.getElementById("successMessage").classList.remove("hidden");
+    form.reset();
+    renderHomeStats();
+    renderProfile();
+    renderAdminTable(getAllOccurrences());
+    showToast("Ocorrência registrada com sucesso.");
+  });
+}
+
+function validateField(field) {
+  const id = field.id;
+  let message = "";
+
+  if (field.required && !field.value.trim()) {
+    message = id === "occurrenceType"
+      ? "Selecione o tipo da ocorrência."
+      : "Este campo é obrigatório.";
+  } else if (id === "occurrenceDescription" && field.value.trim().length < 10) {
+    message = "Descreva a ocorrência com pelo menos 10 caracteres.";
+  }
+
+  field.classList.toggle("invalid", Boolean(message));
+
+  const mapping = {
+    locationText: "locationError",
+    occurrenceType: "typeError",
+    occurrenceNeighborhood: "neighborhoodError",
+    occurrenceDescription: "descriptionError"
+  };
+
+  const errorBox = document.getElementById(mapping[id]);
+  if (errorBox) errorBox.textContent = message;
+  return !message;
+}
+
+function clearErrors() {
+  document.querySelectorAll(".field-error").forEach(el => el.textContent = "");
+  document.querySelectorAll(".invalid").forEach(el => el.classList.remove("invalid"));
+}
+
+function useGeolocation() {
+  const btn = document.getElementById("geoButton");
+  const input = document.getElementById("locationText");
+
+  if (!navigator.geolocation) {
+    showToast("Seu navegador não oferece suporte à geolocalização.");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Localizando…";
+
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      input.value = `Lat ${position.coords.latitude.toFixed(5)}, Lng ${position.coords.longitude.toFixed(5)}`;
+      validateField(input);
+      btn.disabled = false;
+      btn.textContent = "Usar minha localização";
+      showToast("Localização capturada. Você ainda pode editar o campo.");
+    },
+    () => {
+      btn.disabled = false;
+      btn.textContent = "Usar minha localização";
+      showToast("Não foi possível obter sua localização. Digite o endereço manualmente.");
+    },
+    { timeout: 8000 }
+  );
+}
+
+function renderCriticality() {
+  const ranking = {};
+  getAllOccurrences().filter(item => item.score !== null).forEach(item => {
+    if (!ranking[item.neighborhood]) ranking[item.neighborhood] = { total: 0, count: 0 };
+    ranking[item.neighborhood].total += item.score;
+    ranking[item.neighborhood].count += 1;
+  });
+
+  const rows = Object.entries(ranking)
+    .map(([name, meta]) => ({ name, score: Math.round(meta.total / meta.count) }))
+    .sort((a,b) => b.score - a.score)
+    .slice(0,6);
+
+  const list = document.getElementById("rankingList");
+  list.innerHTML = rows.map((row, i) => {
+    const level = row.score >= 85 ? "critico" : row.score >= 70 ? "alto" : row.score >= 50 ? "medio" : "baixo";
+    const label = CRITICALITY_LABELS[level];
+    return `
+      <article class="ranking-item">
+        <span class="rank-number">${i + 1}</span>
+        <div>
+          <strong>${escapeHtml(row.name)}</strong>
+          <small>Índice médio demonstrativo: ${row.score}/100</small>
+        </div>
+        <span class="badge ${level}">${label.icon} ${label.label}</span>
+      </article>`;
+  }).join("");
+}
+
+function renderAdminTable(data) {
+  const body = document.getElementById("adminTableBody");
+  const sorted = [...data].sort((a,b) => b.score - a.score);
+
+  body.innerHTML = sorted.map((item, i) => {
+    const meta = CRITICALITY_LABELS[item.criticality];
+    return `
+      <tr>
+        <td><strong>#${i+1}</strong></td>
+        <td>${escapeHtml(item.title)}</td>
+        <td>${escapeHtml(item.neighborhood)}</td>
+        <td>${item.type === "alagamento" ? "Alagamento" : "Resíduos"}</td>
+        <td><span class="badge ${item.criticality}">${meta.icon} ${meta.label}${item.score === null ? "" : ` · ${item.score}`}</span></td>
+        <td>${STATUS_LABELS[item.status]}</td>
+        <td>
+          <select class="status-select" data-id="${item.id}" aria-label="Atualizar status de ${escapeHtml(item.title)}">
+            <option value="em_analise" ${item.status==="em_analise"?"selected":""}>Em análise</option>
+            <option value="em_atendimento" ${item.status==="em_atendimento"?"selected":""}>Em atendimento</option>
+            <option value="resolvido" ${item.status==="resolvido"?"selected":""}>Resolvido</option>
+          </select>
+        </td>
+      </tr>`;
+  }).join("") || '<tr><td colspan="7">Nenhum ponto encontrado. Altere a busca.</td></tr>';
+
+  document.querySelectorAll(".status-select").forEach(select => {
+    select.addEventListener("change", () => updateStatus(Number(select.dataset.id), select.value));
+  });
+
+  updateAdminSummary(data);
+}
+
+function updateAdminSummary(data) {
+  document.getElementById("adminPriority").textContent = data.filter(x => ["critico","alto"].includes(x.criticality)).length;
+  document.getElementById("adminAnalysis").textContent = data.filter(x => x.status === "em_analise").length;
+  document.getElementById("adminService").textContent = data.filter(x => x.status === "em_atendimento").length;
+  document.getElementById("adminResolved").textContent = data.filter(x => x.status === "resolvido").length;
+}
+
+function updateStatus(id, status) {
+  let stored = getStoredOccurrences();
+  const idx = stored.findIndex(x => x.id === id);
+
+  if (idx >= 0) {
+    stored[idx].status = status;
+    localStorage.setItem("alagaManausOccurrences", JSON.stringify(stored));
+  }
+
+  showToast(`Status atualizado para "${STATUS_LABELS[status]}".`);
+  renderProfile();
+}
+
+function setupAdminControls() {
+  document.getElementById("adminSearch").addEventListener("input", e => {
+    const q = e.target.value.trim().toLowerCase();
+    const filtered = getAllOccurrences().filter(item =>
+      item.title.toLowerCase().includes(q) || item.neighborhood.toLowerCase().includes(q)
+    );
+    renderAdminTable(filtered);
+  });
+
+  document.getElementById("exportCsv").addEventListener("click", exportCsv);
+}
+
+function exportCsv() {
+  const rows = getAllOccurrences().map(item => [
+    item.id,
+    item.title,
+    item.neighborhood,
+    item.type,
+    CRITICALITY_LABELS[item.criticality].label,
+    item.score,
+    STATUS_LABELS[item.status],
+    item.date
+  ]);
+
+  const header = ["ID","Local","Bairro","Tipo","Criticidade","Indice","Status","Data"];
+  const csv = [header, ...rows]
+    .map(row => row.map(v => `"${String(v ?? "").replace(/^[=+@-]/, "'$&").replace(/"/g, '""')}"`).join(";"))
+    .join("\n");
+
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "alagamanau_relatorio.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+
+  showToast("Relatório CSV exportado.");
+}
+
+function renderProfile() {
+  const userItems = getStoredOccurrences();
+  const list = document.getElementById("profileOccurrences");
+  document.getElementById("profileCount").textContent = userItems.length;
+
+  if (!userItems.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <strong>Nenhuma ocorrência registrada por você.</strong>
+        <p>Use a opção “Registrar ocorrência” para criar o primeiro registro.</p>
+      </div>`;
+  } else {
+    list.innerHTML = userItems.map(item => `
+      <article class="timeline-item">
+        <h3>${escapeHtml(item.title)}</h3>
+        <p>${escapeHtml(item.neighborhood)} · ${item.type === "alagamento" ? "Alagamento" : "Resíduos"}</p>
+        <p>Status atual: <strong>${STATUS_LABELS[item.status]}</strong></p>
+      </article>
+    `).join("");
+  }
+
+  renderNotifications(userItems);
+}
+
+function renderNotifications(userItems = getStoredOccurrences()) {
+  const area = document.getElementById("notificationsList");
+  const readAll = localStorage.getItem("alagaManausNotificationsRead") === "1";
+
+  const notifications = [
+    {
+      title: "Ponto crítico em monitoramento",
+      text: "O sistema destaca pontos críticos para facilitar a priorização do gestor."
+    }
+  ];
+
+  if (userItems[0]) {
+    notifications.unshift({
+      title: "Seu registro está em análise",
+      text: `${userItems[0].title}: acompanhe o status pelo seu perfil.`
+    });
+  }
+
+  area.innerHTML = notifications.map(n => `
+    <article class="notification-item ${readAll ? "" : "unread"}">
+      <h3>${escapeHtml(n.title)}</h3>
+      <p>${escapeHtml(n.text)}</p>
+    </article>
+  `).join("");
+}
+
+function setupNotifications() {
+  document.getElementById("markRead").addEventListener("click", () => {
+    localStorage.setItem("alagaManausNotificationsRead", "1");
+    renderNotifications();
+    showToast("Notificações marcadas como lidas.");
+  });
+}
+
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.remove("hidden");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(() => toast.classList.add("hidden"), 3500);
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+
+// ===== refinement.js =====
+/* Refinamentos da versão 2.0. Protótipo local, sem autenticação de produção. */
+let pickerMap, pickerMarker, photoData = '', pendingItem, activeDetailId;
+const $ = id => document.getElementById(id);
+const originalStats = renderHomeStats;
+const originalProfile = renderProfile;
+const originalMarkers = renderMapMarkers;
+const originalInitMap = initMap;
+const originalCriticality = renderCriticality;
+function readLocal(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }
+function saveLocal(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { showToast('Não foi possível salvar. Libere espaço no navegador e tente novamente.'); return false; } }
+getStoredOccurrences = function() { const rows = readLocal('alagaManausOccurrences', []); return Array.isArray(rows) ? rows : []; };
+getAllOccurrences = function() { const updates = readLocal('alagaManausStatus', {}); return [...ALAGA_DATA,...getStoredOccurrences()].map(x => ({...x,status:updates[x.id]?.status || x.status})); };
+renderHomeStats = function() {
+  originalStats();
+  if (!$('homePriorities')) return;
+  const rows = [...getAllOccurrences()].filter(x=>x.score !== null).sort((a,b)=>b.score-a.score);
+  $('homePriorities').innerHTML=rows.slice(1,4).map(x=>`<div class="board-row"><a href="#detalhe-${x.id}">${escapeHtml(x.title)}<small>${escapeHtml(x.neighborhood)}</small></a><b>${x.score}<span class="sr-only"> de 100</span></b></div>`).join('');
+};
+populateNeighborhoods = function() {
+  const selected=$('filterNeighborhood').value;
+  $('filterNeighborhood').innerHTML='<option value="">Todos os bairros</option>';
+  [...new Set(getAllOccurrences().map(x=>x.neighborhood))].sort((a,b)=>a.localeCompare(b)).forEach(n=>{const option=new Option(n,n);$('filterNeighborhood').add(option)});
+  $('filterNeighborhood').value=selected;
+};
+function occurrenceCards(rows) {
+ return rows.length ? rows.map(x=>`<article class="occ-card"><span class="badge ${x.criticality}">${CRITICALITY_LABELS[x.criticality].label}${x.score===null?'':` · ${x.score}/100`}</span><h3><a href="#detalhe-${x.id}">${escapeHtml(x.title)}</a></h3><p>${escapeHtml(x.neighborhood)} · ${x.type==='alagamento'?'Alagamento':'Resíduos'}</p><p>${STATUS_LABELS[x.status]}</p></article>`).join('') : '<div class="empty-state">Nenhuma ocorrência encontrada. Altere os filtros para tentar novamente.</div>';
+}
+renderMapMarkers = function(rows) {
+ if ($('mapResults')) $('mapResults').innerHTML=occurrenceCards(rows);
+ originalMarkers(rows.filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lng)));
+ if (markersLayer) markersLayer.eachLayer(marker=>{const item=rows.find(x=>x.lat===marker.getLatLng().lat&&x.lng===marker.getLatLng().lng);if(item)marker.setPopupContent(`<strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.neighborhood)}<br>${CRITICALITY_LABELS[item.criticality].label} · ${STATUS_LABELS[item.status]}</p><a href="#detalhe-${item.id}">Ver detalhes e histórico</a>`)});
+};
+initMap = function() { currentMapData=getAllOccurrences(); originalInitMap(); applyFilters(); };
+// Reconstrói a camada após uma falha de conexão.
+document.addEventListener('DOMContentLoaded',()=>{$('retryMap').addEventListener('click',()=>{if(map){map.remove();map=null;markersLayer=null}initMap()})});
+applyFilters = function() {
+ const n=$('filterNeighborhood').value,t=$('filterType').value,c=$('filterCriticality').value,p=$('filterPeriod').value;
+ const today=new Date(); today.setHours(23,59,59,999);
+ currentMapData=getAllOccurrences().filter(x=>(!n||n===x.neighborhood)&&(!t||t===x.type)&&(!c||c===x.criticality)&&(!p||(today-new Date(x.date+'T00:00:00'))/86400000<=Number(p)));
+ renderMapMarkers(currentMapData);$('filterResult').textContent=`${currentMapData.length} ocorrência(s) encontrada(s).`;
+};
+routeTo = function(route) {
+ let detail=route.match(/^detalhe-(\d+)$/);if(detail){activeDetailId=Number(detail[1]);route='detalhe'}
+ if (!$('page-'+route)) route='home';
+ document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active-page',x.id==='page-'+route));
+ document.querySelectorAll('[data-route]').forEach(x=>{x.classList.toggle('active',x.dataset.route===route);if(x.dataset.route===route)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current')});
+ $('mainNav').classList.remove('open');$('menuToggle').setAttribute('aria-expanded','false');
+ window.scrollTo({top:0,behavior:'instant'});
+ if(route==='mapa')setTimeout(initMap,60);
+ if(route==='registrar')setTimeout(setupPicker,60);
+ if(route==='gestao')renderAdminTable(getAllOccurrences());
+ if(route==='perfil')renderProfile();
+ if(route==='criticidade')renderCriticality();
+ if(route==='detalhe')renderDetail(activeDetailId);
+ document.title=($('page-'+route).querySelector('h1')?.textContent||'Início')+' | AlagaManaus';
+ $('main-content').focus({preventScroll:true});
+};
+function setupPicker() {
+ if(typeof L==='undefined'){$('locationPicker').textContent='Mapa indisponível. Informe latitude e longitude nos campos acima.';return}
+ if(!pickerMap){$('locationPicker').textContent='';pickerMap=L.map('locationPicker').setView([-3.0937,-60.0212],12);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19}).addTo(pickerMap);pickerMap.on('click',e=>setCoordinates(e.latlng.lat,e.latlng.lng));}
+ pickerMap.invalidateSize();
+}
+function setCoordinates(lat,lng) { $('latitude').value=lat.toFixed(6);$('longitude').value=lng.toFixed(6);if(pickerMap){if(pickerMarker)pickerMarker.setLatLng([lat,lng]);else pickerMarker=L.marker([lat,lng],{draggable:true,title:'Local da ocorrência'}).addTo(pickerMap).on('dragend',()=>{const p=pickerMarker.getLatLng();setCoordinates(p.lat,p.lng)});pickerMap.panTo([lat,lng])} }
+useGeolocation = function() {
+ if(!navigator.geolocation){showToast('Localização indisponível. Informe as coordenadas manualmente.');return}
+ const b=$('geoButton');b.disabled=true;b.textContent='Localizando…';
+ navigator.geolocation.getCurrentPosition(p=>{setCoordinates(p.coords.latitude,p.coords.longitude);b.disabled=false;b.textContent='Usar minha localização';showToast('Coordenadas capturadas. Confira o endereço antes de enviar.')},()=>{b.disabled=false;b.textContent='Usar minha localização';showToast('Não foi possível obter sua localização. Use o mapa ou as coordenadas.')},{timeout:8000});
+};
+validateField = function(field) {
+ const mapping={locationText:['locationError','Informe a rua ou um ponto de referência.'],occurrenceType:['typeError','Selecione alagamento ou descarte irregular.'],occurrenceNeighborhood:['neighborhoodError','Informe o bairro da ocorrência.'],occurrenceDescription:['descriptionError','Descreva o ocorrido com pelo menos 10 caracteres.']};
+ const [error,text]=mapping[field.id];const invalid=field.value.trim().length<(field.id==='occurrenceDescription'?10:1);
+ $(error).textContent=invalid?text:'';field.setAttribute('aria-invalid',String(invalid));field.setAttribute('aria-describedby',error);field.classList.toggle('invalid',invalid);return !invalid;
+};
+setupOccurrenceForm = function() {
+ const form=$('occurrenceForm');
+ ['locationText','occurrenceType','occurrenceNeighborhood','occurrenceDescription'].forEach(id=>$(id).addEventListener('input',()=>{validateField($(id));$('descriptionCount').textContent=$('occurrenceDescription').value.length}));
+ $('geoButton').addEventListener('click',useGeolocation);
+ $('occurrencePhoto').addEventListener('change',async()=>{
+  photoData='';$('photoPreview').classList.add('hidden');const f=$('occurrencePhoto').files[0];if(!f)return;
+  if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>3*1024*1024){showToast('Escolha uma imagem JPG, PNG ou WebP de até 3 MB.');$('occurrencePhoto').value='';return}
+  const reader=new FileReader();reader.onload=()=>{photoData=reader.result;$('photoPreview').src=photoData;$('photoPreview').classList.remove('hidden')};reader.onerror=()=>showToast('Não foi possível ler a imagem. Escolha outra foto.');reader.readAsDataURL(f);
+ });
+ form.addEventListener('reset',()=>{photoData='';$('photoPreview').classList.add('hidden');document.querySelectorAll('.field-error').forEach(x=>x.textContent='');form.querySelectorAll('[aria-invalid]').forEach(x=>{x.setAttribute('aria-invalid','false');x.classList.remove('invalid')});$('descriptionCount').textContent='0';if(pickerMarker){pickerMarker.remove();pickerMarker=null}});
+ form.addEventListener('submit',e=>{
+  e.preventDefault();$('successMessage').classList.add('hidden');
+  const invalid=['locationText','occurrenceType','occurrenceNeighborhood','occurrenceDescription'].map($).filter(x=>!validateField(x));
+  if(invalid.length){invalid[0].focus();return}
+  const lat=Number($('latitude').value),lng=Number($('longitude').value);
+  if(!$('latitude').value||!$('longitude').value||!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180){$('coordinateError').textContent='Informe latitude entre -90 e 90 e longitude entre -180 e 180, ou selecione no mapa.';$('latitude').focus();return}
+  $('coordinateError').textContent='';
+  pendingItem={id:Date.now(),title:$('locationText').value.trim(),neighborhood:$('occurrenceNeighborhood').value.trim(),type:$('occurrenceType').value,criticality:'pendente',score:null,lat,lng,date:new Date().toISOString().slice(0,10),status:'em_analise',description:$('occurrenceDescription').value.trim(),photo:photoData,userCreated:true};
+  $('reviewContent').innerHTML=`<h2 id="reviewTitle">Confira sua ocorrência</h2><p><strong>${escapeHtml(pendingItem.title)}</strong><br>${escapeHtml(pendingItem.neighborhood)}</p><p>${pendingItem.type==='alagamento'?'Alagamento':'Descarte irregular'} · ${lat.toFixed(5)}, ${lng.toFixed(5)}</p><p>${escapeHtml(pendingItem.description)}</p><p>O registro será salvo neste navegador, com criticidade pendente de avaliação.</p>`;
+  $('reviewDialog').showModal();
+ });
+};
+updateStatus = function(id,status) {
+ const changes=readLocal('alagaManausStatus',{});const previous=getAllOccurrences().find(x=>x.id===id);if(!previous)return;
+ changes[id]={status,history:[...(changes[id]?.history||[]),{status,date:new Date().toISOString()}]};
+ if(!saveLocal('alagaManausStatus',changes))return;
+ localStorage.removeItem('alagaManausNotificationsRead');renderAdminTable(getAllOccurrences());renderHomeStats();renderProfile();showToast('Status salvo: '+STATUS_LABELS[status]+'.');
+};
+renderProfile = function() {originalProfile();const items=getAllOccurrences().filter(x=>x.userCreated);if(items.length)$('profileOccurrences').innerHTML=occurrenceCards(items);const session=readLocal('alagaManausSession',null);$('profileTitle').textContent=session?.name||'Usuário demonstrativo';document.querySelector('#page-perfil .eyebrow').textContent=session?.role==='gestor'?'Perfil gestor · demonstração':'Perfil cidadão';};
+renderNotifications = function() {
+ const changes=readLocal('alagaManausStatus',{}),read=localStorage.getItem('alagaManausNotificationsRead')==='1';
+ const items=getAllOccurrences().filter(x=>x.userCreated||changes[x.id]);
+ $('notificationsList').innerHTML=items.length?items.map(x=>`<article class="notification-item ${read?'':'unread'}"><h3>${STATUS_LABELS[x.status]}</h3><p><a href="#detalhe-${x.id}">${escapeHtml(x.title)}</a>: consulte o histórico de atendimento.</p></article>`).join(''):'<div class="empty-state">Nenhuma atualização por enquanto.</div>';
+};
+renderCriticality = function(){originalCriticality();document.querySelectorAll('#rankingList small').forEach(x=>{if(x.textContent.includes('NaN'))x.textContent='Aguardando classificação'});};
+function renderDetail(id) {
+ const x=getAllOccurrences().find(x=>x.id===id);if(!x){$('detailBody').innerHTML='<p>Ocorrência não encontrada. <a href="#mapa">Voltar ao mapa</a></p>';return}
+ const changes=readLocal('alagaManausStatus',{}),history=changes[id]?.history||[];
+ $('detailBody').innerHTML=`<div class="section-heading"><div><span class="eyebrow">Ocorrência #${x.id}</span><h1>${escapeHtml(x.title)}</h1><p>${escapeHtml(x.neighborhood)} · ${x.type==='alagamento'?'Alagamento':'Resíduos'}</p></div><a href="#mapa" class="btn btn-secondary">Voltar ao mapa</a></div><div class="detail-summary"><article class="panel"><span class="badge ${x.criticality}">${CRITICALITY_LABELS[x.criticality].label}${x.score===null?'':` · ${x.score}/100`}</span><h2>Sobre o registro</h2><p>${escapeHtml(x.description)}</p>${x.photo?`<img class="photo-preview" src="${escapeHtml(x.photo)}" alt="Foto enviada da ocorrência em ${escapeHtml(x.title)}">`:'<p>Nenhuma foto anexada a este registro.</p>'}<p>Coordenadas: ${x.lat.toFixed(5)}, ${x.lng.toFixed(5)}</p><h2>Histórico de atendimento</h2><article class="timeline-item"><strong>Registro em ${x.date.split('-').reverse().join('/')}</strong><p>${STATUS_LABELS[x.status]} · situação atual</p></article>${history.map(h=>`<article class="timeline-item"><strong>${STATUS_LABELS[h.status]}</strong><p>${new Date(h.date).toLocaleString('pt-BR')}</p></article>`).join('')}</article><aside class="panel"><h2>Status atual</h2><strong>${STATUS_LABELS[x.status]}</strong><p>${{em_analise:'O registro está aguardando avaliação.',em_atendimento:'A ocorrência está em acompanhamento para atendimento.',resolvido:'O atendimento foi marcado como concluído.'}[x.status]}</p><h2>Sobre o índice</h2><p>${x.score===null?'A criticidade será definida após avaliação.':'Valor fictício da amostra acadêmica. Não representa uma avaliação oficial de risco.'}</p><a href="#criticidade">Entender os critérios</a></aside></div>`;
+}
+CRITICALITY_LABELS.pendente={label:'Aguardando avaliação',icon:'?'};
+$('occurrenceForm').querySelector('.form-grid').insertAdjacentHTML('afterbegin',`<div class="form-group full"><div class="coordinate-grid"><div><label for="latitude">Latitude *</label><input id="latitude" type="number" step="any" min="-90" max="90" placeholder="Ex.: -3.0937" aria-describedby="coordinateError"></div><div><label for="longitude">Longitude *</label><input id="longitude" type="number" step="any" min="-180" max="180" placeholder="Ex.: -60.0212" aria-describedby="coordinateError"></div></div><div class="field-error" id="coordinateError" role="alert"></div><div id="locationPicker" class="location-picker" aria-label="Selecione o local da ocorrência">Carregando mapa de localização…</div></div>`);
+// O endereço continua sendo a primeira informação do formulário.
+const coords=$('latitude').closest('.form-group');const address=$('locationText').closest('.form-group');address.after(coords);
+$('occurrencePhoto').accept='image/jpeg,image/png,image/webp';$('occurrencePhoto').nextElementSibling.textContent='JPG, PNG ou WebP, até 3 MB. A foto será salva apenas neste navegador.';
+$('occurrencePhoto').parentElement.insertAdjacentHTML('beforeend','<img id="photoPreview" class="photo-preview hidden" alt="Prévia da foto selecionada">');
+$('page-mapa').querySelector('.map-layout').insertAdjacentHTML('afterend','<h2 style="margin-top:30px;font-size:1.2rem">Ocorrências no território</h2><div id="mapResults" class="map-result-list" aria-live="polite"></div>');
+$('filterCriticality').add(new Option('Aguardando avaliação','pendente'));
+$('main-content').insertAdjacentHTML('beforeend',`
+<section id="page-detalhe" class="page"><div id="detailBody" class="container section-block"></div></section>
+<section id="page-login" class="page"><div class="container section-block"><div class="section-heading"><div><span class="eyebrow">Seu espaço no AlagaManaus</span><h1>Acessar demonstração</h1></div></div><div class="form-card auth-card"><p>Experimente os perfis de cidadão e gestor. Este acesso é simulado; não utilize uma senha real.</p><div class="auth-tabs"><button class="btn btn-secondary" id="loginTab">Entrar</button><button class="btn btn-secondary" id="signupTab">Criar perfil</button></div><form id="authForm"><label for="authName">Nome de exibição</label><input id="authName" required autocomplete="nickname" placeholder="Como podemos chamar você?"><label for="authEmail">E-mail</label><input id="authEmail" type="email" required autocomplete="email" placeholder="nome@exemplo.com"><label for="authRole">Perfil de demonstração</label><select id="authRole"><option value="cidadao">Cidadão</option><option value="gestor">Gestor público</option></select><label for="authPassword">Senha de teste (mínimo de 8 caracteres)</label><input id="authPassword" type="password" required minlength="8" autocomplete="off" aria-describedby="authHelp"><small id="authHelp">A senha não é armazenada ou verificada contra um servidor.</small><button class="btn btn-primary" id="authSubmit">Entrar na demonstração</button><button type="button" class="link-button" id="recoverPassword">Recuperar senha</button><p id="authFeedback" role="status"></p></form></div></div></section>
+<section id="page-ajuda" class="page"><div class="container section-block"><div class="section-heading"><div><span class="eyebrow">Orientações de uso</span><h1>Ajuda e acessibilidade</h1></div></div><div class="help-grid"><article class="panel"><h2>Como usar o AlagaManaus</h2><details open><summary>Como registrar uma ocorrência?</summary><p>Abra “Registrar ocorrência”, descreva o endereço, escolha o ponto no mapa ou informe coordenadas. Preencha os detalhes e revise antes de confirmar.</p></details><details><summary>O que significa cada status?</summary><p>Em análise: aguardando avaliação. Em atendimento: em acompanhamento para atendimento. Resolvido: atendimento marcado como concluído.</p></details><details><summary>Como funciona a criticidade?</summary><p>Os índices da amostra são fictícios. Recorrência, gravidade e população afetada ilustram a futura análise. Novos registros aguardam classificação.</p></details><details><summary>Meus dados são enviados à prefeitura?</summary><p>Não. Este é um protótipo acadêmico: os registros ficam apenas no navegador. Não há integração com órgãos públicos.</p></details></article><article class="panel"><h2>Navegação acessível</h2><p>Use Tab e Shift + Tab para percorrer os controles; Enter para ativar links e botões; Escape para fechar a revisão. O primeiro link permite pular a navegação.</p><p>As ocorrências também aparecem em lista. Os níveis têm rótulos em texto e os campos de coordenadas oferecem uma alternativa ao uso do mapa.</p><p>Você pode ampliar o navegador com Ctrl + “+”. A interface se adapta a telas menores e respeita a preferência de movimento reduzido.</p><h2>Sem conexão?</h2><p>Os mapas dependem da internet. Os registros locais podem ser consultados pela lista e pelo perfil. Para usar geolocalização, abra em localhost ou HTTPS.</p></article></div></div></section>
+<section id="page-design" class="page"><div class="container section-block"><div class="section-heading"><div><span class="eyebrow">AlagaManaus / 2.0</span><h1>Guia visual da interface</h1></div></div><div class="panel"><h2>Cores e identidade</h2><div class="swatches"><div class="swatch"><span style="background:#102f40"></span><p>Azul institucional<br>#102F40</p></div><div class="swatch"><span style="background:#075b65"></span><p>Verde de ação<br>#075B65</p></div><div class="swatch"><span style="background:#536675"></span><p>Texto secundário<br>#536675</p></div><div class="swatch"><span style="background:#f5f7f8"></span><p>Fundo<br>#F5F7F8</p></div></div><h2>Tipografia e ritmo</h2><p>Segoe UI / Arial / sans-serif. Texto-base de 16 px; títulos fluidos; espaçamentos de 8, 16, 24 e 32 px. Bordas discretas e sombras contidas.</p><h2>Criticidade</h2><div class="hero-actions"><span class="badge critico">Crítico</span><span class="badge alto">Alto</span><span class="badge medio">Médio</span><span class="badge baixo">Baixo</span><span class="badge pendente">Aguardando avaliação</span></div><h2>Ações</h2><div class="hero-actions"><a href="#registrar" class="btn btn-primary">Registrar ocorrência</a><a href="#mapa" class="btn btn-secondary">Consultar mapa</a><a href="#ajuda" class="btn btn-ghost">Ajuda</a></div><h2>Consistência e foco</h2><p>As mesmas cores, botões, rótulos e cartões aparecem em todas as telas (H4). Hierarquia e espaçamento destacam a ação principal (H8). Tab mostra o contorno de foco dos controles.</p></div></div></section>`);
+document.body.insertAdjacentHTML('beforeend','<dialog id="reviewDialog" aria-labelledby="reviewTitle"><div id="reviewContent"></div><div class="form-actions"><button class="btn btn-secondary" id="editReview">Voltar e corrigir</button><button class="btn btn-primary" id="confirmReview">Confirmar registro</button></div></dialog>');
+$('editReview').onclick=()=>$('reviewDialog').close();
+$('confirmReview').onclick=()=>{if(!pendingItem)return;if(!saveLocal('alagaManausOccurrences',[pendingItem,...getStoredOccurrences()]))return;pendingItem=null;localStorage.removeItem('alagaManausNotificationsRead');$('reviewDialog').close();$('occurrenceForm').reset();$('successMessage').classList.remove('hidden');$('successMessage').scrollIntoView({block:'center'});renderHomeStats();populateNeighborhoods();renderProfile();showToast('Ocorrência salva. Acompanhe o registro no seu perfil.')};
+$('signupTab').onclick=()=>{$('authSubmit').textContent='Criar perfil demonstrativo';$('authName').focus()};
+$('loginTab').onclick=()=>{$('authSubmit').textContent='Entrar na demonstração';$('authEmail').focus()};
+$('authForm').onsubmit=e=>{e.preventDefault();if(!saveLocal('alagaManausSession',{name:$('authName').value.trim(),role:$('authRole').value}))return;$('authPassword').value='';location.hash=$('authRole').value==='gestor'?'gestao':'perfil';showToast('Perfil demonstrativo ativado.')};
+$('recoverPassword').onclick=()=>{$('authFeedback').textContent='Recuperação simulada: em produção, um link seria enviado ao e-mail informado. Nenhuma mensagem foi enviada.'};
+function updateConnection(){if(!navigator.onLine){$('systemStatus').textContent='Sem conexão · consulte os registros locais pela lista';$('systemStatus').classList.add('offline-banner')}else{$('systemStatus').textContent='Ambiente de demonstração · registros fictícios para avaliação acadêmica';$('systemStatus').classList.remove('offline-banner')}}
+window.addEventListener('online',updateConnection);window.addEventListener('offline',updateConnection);updateConnection();
+
+
+// ===== dashboard.js =====
+// Módulo reservado para painéis, indicadores e ranking de criticidade.
+
+
+// ===== map.js =====
+// Módulo reservado para lógica exclusiva do mapa em uma futura refatoração.
+
+
+// ===== occurrence.js =====
+// Módulo reservado para registro e validação de ocorrências.
+
+
+// ===== utils.js =====
+// Funções utilitárias podem ser centralizadas aqui na evolução do protótipo.
+
+</script>
+</body>
+</html>
