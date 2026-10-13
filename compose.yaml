@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: alagamanaus
+      POSTGRES_USER: alagamanaus
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - dados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alagamanaus"]
+      interval: 5s
+      retries: 10
+volumes:
+  dados:

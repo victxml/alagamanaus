@@ -1,0 +1,22 @@
+{
+  "name": "alagamanaus",
+  "version": "1.1.0",
+  "description": "Sistema georreferenciado de ocorrências urbanas, moderação e criticidade de Manaus",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env backend/server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "module",
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "pg": "^8.23.1",
+    "proj4": "^2.22.0",
+    "sharp": "^0.35.5"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "private": true
+}
