@@ -70,7 +70,25 @@ async function body(req, limit = 16384) {
   }
 }
 const limits = new Map();
+const isProduction = process.env.NODE_ENV === "production";
+const publicOrigin = process.env.PUBLIC_ORIGIN || null;
+const secureCookies = process.env.COOKIE_SECURE === "true" ||
+  Boolean(publicOrigin?.startsWith("https://"));
+const sessionCookie = (value, maxAge) =>
+  `am_session=${value}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}${secureCookies ? "; Secure" : ""}`;
+function checkProductionConfiguration() {
+  if (!isProduction) return;
+  if (!publicOrigin || !publicOrigin.startsWith("https://"))
+    throw new Error("Produção exige PUBLIC_ORIGIN com HTTPS.");
+  if (!secureCookies || process.env.COOKIE_SECURE === "false")
+    throw new Error("Produção exige cookies Secure.");
+  if (!process.env.ADMIN_PASSWORD ||
+      /troque|change|exemplo|example/i.test(process.env.ADMIN_PASSWORD))
+    throw new Error("Configure uma senha administrativa forte antes de publicar.");
+}
+
 export async function boot() {
+  checkProductionConfiguration();
   await init();
   if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
     userInput({
@@ -111,11 +129,15 @@ export async function boot() {
       res.end(JSON.stringify(value));
     };
     res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), payment=()");
+    if (publicOrigin?.startsWith("https://"))
+      res.setHeader("Strict-Transport-Security", "max-age=31536000");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
     res.setHeader("Cache-Control", "no-store");
     res.setHeader(
       "Content-Security-Policy",
-      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; frame-ancestors 'none'",
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self' https://nominatim.openstreetmap.org https://viacep.com.br; frame-ancestors 'none'",
     );
     try {
       const url = new URL(req.url, "http://localhost"),
@@ -136,13 +158,14 @@ export async function boot() {
           throw fail("Muitas requisições. Aguarde um minuto.", 429);
         if (limits.size > 10000)
           for (const [k, v] of limits) if (v.until < now) limits.delete(k);
-        if (
-          !["GET", "HEAD"].includes(m) &&
-          req.headers.origin &&
-          req.headers.origin !==
-            `${process.env.PUBLIC_ORIGIN || "http://" + req.headers.host}`
-        )
-          throw fail("Origem não permitida.", 403);
+        // Rejeita requisições de escrita entre sites, mesmo sem cabeçalho Origin.
+        if (!["GET", "HEAD"].includes(m)) {
+          if (req.headers["sec-fetch-site"] === "cross-site")
+            throw fail("Origem não permitida.", 403);
+          const expectedOrigin = publicOrigin || "http://" + req.headers.host;
+          if (req.headers.origin && req.headers.origin !== expectedOrigin)
+            throw fail("Origem não permitida.", 403);
+        }
         const raw = /am_session=([a-f0-9]+)/.exec(
           req.headers.cookie || "",
         )?.[1];
@@ -199,7 +222,7 @@ export async function boot() {
           ]);
           res.setHeader(
             "Set-Cookie",
-            `am_session=${t}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800${process.env.COOKIE_SECURE === "true" ? "; Secure" : ""}`,
+            sessionCookie(t, 28800),
           );
           return send({
             user: { id: x.id, name: x.name, email: x.email, role: x.role },
@@ -286,7 +309,7 @@ export async function boot() {
             await query("DELETE FROM sessions WHERE token=$1", [digest(raw)]);
           res.setHeader(
             "Set-Cookie",
-            "am_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0",
+            sessionCookie("", 0),
           );
           return send({ message: "Sessão encerrada." });
         }

@@ -90,28 +90,73 @@ function areaName(a) {
 function formatDate(date) {
   return new Date(date + "T12:00:00").toLocaleDateString("pt-BR");
 }
+function occurrencePreview(x, context = "admin") {
+  const image = x.imageUrl ? `<button type="button" class="occurrence-thumb" data-preview="${esc(x.id)}" aria-label="Ampliar foto de ${esc(x.title)}"><img src="${esc(x.imageUrl)}" alt="Foto da ocorrência em ${esc(x.title)}" loading="lazy" /><span>Ampliar foto ↗</span></button>` : '<span class="no-photo">Sem foto anexada</span>';
+  return `<div class="occurrence-preview ${context === "map" ? "map-preview" : ""}">${image}<details class="description-preview"><summary>Descrição da ocorrência</summary><p>${esc(x.description)}</p></details><p class="description-excerpt">${esc(x.description.slice(0, 160))}${x.description.length > 160 ? "…" : ""}</p></div>`;
+}
+function handlePhotoPreview(e) {
+  const button = e.target.closest("[data-preview]");
+  if (!button) return;
+  e.stopPropagation();
+  const collection = location.hash === "#gestao" ? adminItems : items;
+  openPhotoPreview(collection.find(x => x.id === button.dataset.preview));
+}
+function openPhotoPreview(x) {
+  if (!x?.imageUrl) return;
+  let dialog = $("photoDialog");
+  if (!dialog) {
+    dialog = document.createElement("dialog");
+    dialog.id = "photoDialog";
+    dialog.className = "photo-dialog";
+    dialog.setAttribute("aria-labelledby", "photoDialogTitle");
+    document.body.appendChild(dialog);
+  }
+  dialog.innerHTML = `<form method="dialog" class="photo-dialog-heading"><h2 id="photoDialogTitle">${esc(x.title)}</h2><button class="btn btn-secondary" autofocus>Fechar</button></form><img src="${esc(x.imageUrl)}" alt="Foto anexada à ocorrência em ${esc(x.title)}" /><p>${esc(x.description)}</p>`;
+  dialog.showModal();
+}
 function cards(rows) {
   return (
     rows
       .map(
         (x) =>
-          `<article class="panel"><h3><a href="#detalhe-${x.id}">${esc(x.title)}</a></h3><p>${esc(x.neighborhood)} · ${formatDate(x.date)} · ${x.type === "alagamento" ? "Alagamento" : "Resíduos"}</p>${badge(x)}<p>${esc(x.description)}</p></article>`,
+          `<article class="panel"><h3><a href="#detalhe-${x.id}">${esc(x.title)}</a></h3><p>${esc(x.neighborhood)} · ${formatDate(x.date)} · ${x.type === "alagamento" ? "Alagamento" : "Resíduos"}</p>${badge(x)}${occurrencePreview(x, "map")}<a href="#detalhe-${encodeURIComponent(x.id)}">Ver ocorrência completa ↗</a></article>`,
       )
       .join("") || "<p>Nenhuma ocorrência aprovada corresponde à consulta.</p>"
   );
+}
+function neighborhoodKey(name) {
+  return String(name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR");
+}
+function populateNeighborhoods() {
+  const select = $("filterNeighborhood");
+  const selected = select.value;
+  const names = new Map(MANAUS_NEIGHBORHOODS.map(n => [neighborhoodKey(n.name), n.name]));
+  items.forEach(x => {
+    if (!names.has(neighborhoodKey(x.neighborhood))) names.set(neighborhoodKey(x.neighborhood), x.neighborhood);
+  });
+  select.replaceChildren(new Option("Todos os bairros", ""));
+  [...names.values()].sort((a, b) => a.localeCompare(b, "pt-BR")).forEach(name => select.add(new Option(name, name)));
+  select.value = selected;
+}
+function focusNeighborhood() {
+  if (!map) return;
+  const name = $("filterNeighborhood").value;
+  if (!name) {
+    map.setView([-3.0937, -60.0212], 12);
+    return;
+  }
+  const neighborhood = MANAUS_NEIGHBORHOODS.find(n => neighborhoodKey(n.name) === neighborhoodKey(name));
+  if (neighborhood) map.fitBounds(neighborhood.bounds, { padding: [24, 24], maxZoom: 15 });
+  else {
+    const points = items.filter(x => neighborhoodKey(x.neighborhood) === neighborhoodKey(name)).map(x => [x.lat, x.lng]);
+    if (points.length) map.fitBounds(points, { padding: [24, 24], maxZoom: 15 });
+  }
 }
 async function refresh() {
   const b = await api("/occurrences");
   items = b.items;
   areas = (await api("/areas")).items;
-  const selected = $("filterNeighborhood").value;
-  $("filterNeighborhood").innerHTML =
-    '<option value="">Todos os bairros</option>' +
-    [...new Set(items.map((x) => x.neighborhood))]
-      .sort()
-      .map((n) => `<option value="${esc(n)}">${esc(n)}</option>`)
-      .join("");
-  $("filterNeighborhood").value = selected;
+  populateNeighborhoods();
   $("statTotal").textContent = items.length;
   $("statCritical").textContent = areas.filter(
     (x) => x.criticality === "alto",
@@ -125,6 +170,7 @@ async function refresh() {
   );
   $("statNeighborhood").textContent =
     Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0] || "—";
+  updateAnalysisSummary();
   const ranking = [...areas].sort((a, b) => b.score - a.score);
   $("rankingList").innerHTML =
     ranking
@@ -166,7 +212,17 @@ async function refresh() {
   $("criticalityCounts").textContent = first
     ? `${first.a} relato(s) de alagamento e ${first.r} de resíduos nos últimos 90 dias. ${first.recurring ? "Alagamentos registrados em dias diferentes." : "Ainda não há repetição de alagamentos em dias diferentes."}`
     : "Novos registros passam por análise antes de aparecer aqui.";
-  $("homePriorities").innerHTML = cards(items.slice(0, 3));
+  $("homePriorities").innerHTML = [...items]
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+    .slice(0, 3)
+    .map(x => `<a class="home-record" href="#detalhe-${encodeURIComponent(x.id)}"><span class="home-record-icon" aria-hidden="true">${x.type === "alagamento" ? "≈" : "◇"}</span><span><strong>${esc(x.title)}</strong><small>${esc(x.neighborhood)} · ${formatDate(x.date)}</small></span><span class="home-record-arrow" aria-hidden="true">↗</span></a>`).join("")
+    || '<div class="home-empty"><span class="home-empty-icon" aria-hidden="true">⌖</span><div><strong>O próximo registro pode ser o seu.</strong><p>Os relatos aparecem aqui após a moderação.</p></div></div>';
+  const homeBadge = document.querySelector(".priority-spotlight .badge");
+  homeBadge.className = "badge " + (first?.criticality || "sem_dados");
+  const homeScore = document.querySelector(".hero-score");
+  homeScore.style.setProperty("--home-score", first?.score || 0);
+  homeScore.style.setProperty("--home-color", color(first?.criticality || "sem_dados"));
+  homeScore.setAttribute("aria-label", first ? `Índice ${first.score} de 100` : "Sem dados para calcular o índice");
   await filters();
 }
 function queryFilters() {
@@ -184,7 +240,11 @@ function queryFilters() {
 }
 async function filters() {
   filterQuery = queryFilters();
-  const b = await api("/occurrences?" + filterQuery);
+  const selectedNeighborhood = $("filterNeighborhood").value;
+  const query = new URLSearchParams(filterQuery);
+  query.delete("neighborhood");
+  const b = await api("/occurrences?" + query);
+  if (selectedNeighborhood) b.items = b.items.filter(x => neighborhoodKey(x.neighborhood) === neighborhoodKey(selectedNeighborhood));
   draw(b.items);
   $("filterResult").textContent =
     b.items.length + " ocorrência(s) aprovada(s).";
@@ -206,7 +266,8 @@ function draw(rows) {
   for (const x of rows)
     L.circleMarker([x.lat, x.lng], { radius: 9, color: color(x.criticality) })
       .bindPopup(
-        `<strong>${esc(x.title)}</strong><p>${esc(x.date)} · ${badge(x)}</p><a href="#detalhe-${x.id}">Ver detalhes</a>`,
+        `<div class="map-occurrence-popup"><strong>${esc(x.title)}</strong><p>${formatDate(x.date)} · ${esc(x.neighborhood)}</p>${badge(x)}${occurrencePreview(x, "map")}<a href="#detalhe-${encodeURIComponent(x.id)}">Ver ocorrência completa ↗</a></div>`,
+        { maxWidth: 320 },
       )
       .addTo(layer);
 }
@@ -234,14 +295,21 @@ function initMap() {
       .addTo(map);
     areaLayer = L.layerGroup().addTo(map);
     layer = L.layerGroup().addTo(map);
+    map.on("popupopen", e => {
+      const element = e.popup.getElement();
+      element.removeEventListener("click", handlePhotoPreview);
+      element.addEventListener("click", handlePhotoPreview);
+    });
   }
   map.invalidateSize();
   $("mapLoading").classList.add("hidden");
+  focusNeighborhood();
   safe(filters)();
 }
 function setPoint(lat, lng) {
   $("latitude").value = lat.toFixed(6);
   $("longitude").value = lng.toFixed(6);
+  $("occurrenceForm").dispatchEvent(new Event("locationupdated"));
   if (picker) {
     if (point) point.setLatLng([lat, lng]);
     else
@@ -252,6 +320,127 @@ function setPoint(lat, lng) {
           setPoint(p.lat, p.lng);
         });
     picker.panTo([lat, lng]);
+  }
+}
+// Consultas explícitas: nenhum pedido é feito a cada tecla digitada.
+let addressLookupVersion = 0;
+async function lookupAddress(byPostalCode = false) {
+  const version = ++addressLookupVersion;
+  const current = () => version === addressLookupVersion;
+  const status = $("addressStatus");
+  const buttons = [$("postalSearch"), $("addressSearch")];
+  const snapshot = () => ["postalCode", "locationText", "occurrenceNeighborhood", "latitude", "longitude"].map(id => $(id).value).join("|");
+  let original = snapshot();
+  const unchanged = () => current() && original === snapshot();
+  buttons.forEach(button => button.disabled = true);
+  status.textContent = "Buscando endereço…";
+  try {
+    if (byPostalCode) {
+      const cep = $("postalCode").value.replace(/\D/g, "");
+      if (cep.length !== 8) throw Error("Informe um CEP com 8 dígitos.");
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, {signal: AbortSignal.timeout(10000)});
+      if (!response.ok) throw Error("Consulta de CEP indisponível. Tente novamente ou preencha manualmente.");
+      const data = await response.json();
+      if (!unchanged()) return;
+      if (data.erro) throw Error("CEP não encontrado. Confira os números ou preencha o endereço manualmente.");
+      if (data.ibge !== "1302603") throw Error("Este CEP não pertence a Manaus. Informe um CEP da cidade.");
+      if (data.logradouro) $("locationText").value = data.logradouro;
+      if (data.bairro) $("occurrenceNeighborhood").value = data.bairro;
+      ["locationText", "occurrenceNeighborhood"].forEach(id => $(id).dispatchEvent(new Event("input", {bubbles: true})));
+      original = snapshot();
+      if (!data.logradouro) throw Error("CEP geral encontrado. Complete a rua e o bairro e clique em Localizar endereço no mapa.");
+      status.textContent = "Endereço preenchido. Buscando o ponto aproximado…";
+    }
+    const street = $("locationText").value.trim();
+    const neighborhood = $("occurrenceNeighborhood").value.trim();
+    if (!street || !neighborhood) throw Error("Preencha a rua e o bairro para localizar no mapa.");
+    const params = new URLSearchParams({format: "jsonv2", q: `${street}, ${neighborhood}, Manaus, Amazonas, Brasil`, countrycodes: "br", limit: "1", viewbox: "-60.2,-2.8,-59.8,-3.3", bounded: "1"});
+    const response = await fetch("https://nominatim.openstreetmap.org/search?" + params, {signal: AbortSignal.timeout(10000)});
+    if (!response.ok) throw Error("Busca no mapa indisponível. O endereço foi mantido; marque o ponto manualmente.");
+    const results = await response.json();
+    if (!unchanged()) return;
+    const lat = Number(results[0]?.lat), lng = Number(results[0]?.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) throw Error("Endereço não localizado no mapa. Confira a rua e o bairro ou marque o ponto manualmente.");
+    initPicker();
+    setPoint(lat, lng);
+    if (picker) picker.setView([lat, lng], 17);
+    status.textContent = "Ponto aproximado encontrado. Confira o mapa e arraste o marcador até o local exato da ocorrência.";
+  } catch (error) {
+    if (unchanged()) status.textContent = error.name === "TimeoutError" || error.name === "TypeError"
+      ? "Não foi possível concluir a consulta. Confira sua conexão ou preencha o endereço e marque o ponto manualmente."
+      : error.message;
+  } finally {
+    if (current()) {
+      if (original !== snapshot() && status.textContent.includes("Buscando")) status.textContent = "Os dados foram alterados. Faça uma nova busca para o endereço atual.";
+      buttons.forEach(button => button.disabled = false);
+    }
+  }
+}
+// Resolve o endereço somente após o usuário solicitar sua localização.
+async function useCurrentLocation() {
+  if (!navigator.geolocation)
+    return toast("Geolocalização indisponível. Preencha o endereço e as coordenadas.");
+  const button = $("geoButton");
+  if (button.disabled) return;
+  const label = button.textContent;
+  button.disabled = true;
+  button.textContent = "Localizando…";
+  let located = false;
+  try {
+    const position = await new Promise((resolve, reject) =>
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 20000,
+      }),
+    );
+    const { latitude, longitude, accuracy } = position.coords;
+    setPoint(latitude, longitude);
+    located = true;
+    if (picker) picker.setView([latitude, longitude], 17);
+    const coordinates = [$("latitude").value, $("longitude").value];
+    const streetField = $("locationText");
+    const neighborhoodField = $("occurrenceNeighborhood");
+    const previousStreet = streetField.value;
+    const previousNeighborhood = neighborhoodField.value;
+    button.textContent = "Buscando endereço…";
+    const query = new URLSearchParams({
+      format: "jsonv2", lat: String(latitude), lon: String(longitude),
+      addressdetails: "1", zoom: "18", layer: "address", "accept-language": "pt-BR",
+    });
+    const response = await fetch("https://nominatim.openstreetmap.org/reverse?" + query, {
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!response.ok) throw Error("Endereço indisponível");
+    const data = await response.json();
+    if (data.error || !data.address) throw Error("Endereço não encontrado");
+    // Não sobrescreve um ponto ou endereço que a pessoa alterou durante a consulta.
+    if (coordinates[0] !== $("latitude").value || coordinates[1] !== $("longitude").value)
+      return toast("O ponto foi alterado. Confira o endereço do local selecionado.");
+    const address = data.address;
+    const street = address.road || address.pedestrian || address.residential || address.footway || "";
+    const neighborhood = address.suburb || address.quarter || address.neighbourhood || "";
+    if (street && streetField.value === previousStreet) {
+      streetField.value = street + (address.house_number ? ", " + address.house_number : "");
+      streetField.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    if (neighborhood && neighborhoodField.value === previousNeighborhood) {
+      neighborhoodField.value = neighborhood;
+      neighborhoodField.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    const precision = Number.isFinite(accuracy) ? ` Precisão estimada: ${Math.round(accuracy)} m.` : "";
+    toast((street && neighborhood
+      ? "Localização obtida. Confira a rua e o bairro antes de enviar."
+      : "Localização obtida; endereço incompleto. Confira e complete rua e bairro.") + precision);
+  } catch (error) {
+    toast(located
+      ? "Coordenadas obtidas, mas não foi possível consultar o endereço. Preencha rua e bairro."
+      : error.code === 1
+        ? "Permita o acesso à localização no navegador ou preencha os dados manualmente."
+        : "Não foi possível obter a localização. Tente novamente ou preencha os dados manualmente.");
+  } finally {
+    button.disabled = false;
+    button.textContent = label;
   }
 }
 function initPicker() {
@@ -327,47 +516,49 @@ async function admin() {
     : '<a href="#login">Entre com uma conta de gestor ou administrador.</a>';
   $("exportCsv").disabled = !allowed;
   $("adminTableBody").innerHTML = "";
-  $("userManagement").innerHTML = "";
+  $("managementContent").classList.toggle("hidden", !allowed);
   if (!allowed) return;
+  await refresh();
   adminItems = await api("/admin/occurrences");
   adminTable();
-  if (user.role === "admin") await renderUsers();
+
+}
+function analysisWindow() {
+  const now = new Date();
+  return { end: civilDate(now), start: civilDate(new Date(now.getTime() - 89 * 86400000)) };
+}
+function inAnalysisPeriod(row) {
+  const {start, end} = analysisWindow();
+  return row.date >= start && row.date <= end;
+}
+function updateAnalysisSummary() {
+  const included = items.filter(inAnalysisPeriod);
+  $("analysisIncluded").textContent = included.length;
+  $("analysisAreas").textContent = areas.length;
+  $("analysisRecurring").textContent = areas.filter(a => a.recurring).length;
+  $("analysisHistorical").textContent = items.length - included.length;
+  const {start, end} = analysisWindow();
+  $("analysisDateRange").textContent = `${formatDate(start)} a ${formatDate(end)}`;
+}
+function adminContribution(x) {
+  if (x.moderation !== "approved") return '<span class="contribution muted">Não participa</span><small>Depende de aprovação</small>';
+  if (!inAnalysisPeriod(x)) return '<span class="contribution historical">Registro histórico</span><small>Fora dos últimos 90 dias</small>';
+  return `<span class="contribution included">Incluído no cálculo</span><small>Índice da área: ${x.score ?? "—"}/100</small>${badge(x)}`;
 }
 function adminTable() {
-  const q = $("adminSearch").value.toLowerCase();
-  $("adminTableBody").innerHTML = adminItems
-    .filter((x) => (x.title + " " + x.neighborhood).toLowerCase().includes(q))
-    .map(
-      (x, i) =>
-        `<tr><td>${i + 1}</td><td><a href="#detalhe-${x.id}">${esc(x.title)}</a></td><td>${esc(x.neighborhood)}</td><td>${x.type === "alagamento" ? "Alagamento" : "Resíduos"}</td><td>${badge(x)}</td><td>${decisions[x.moderation]}<br>${statuses[x.status]}<br>${esc(x.reason)}</td><td>${user.role === "admin" ? `<button data-action="approve" data-id="${x.id}">Aprovar</button><button data-action="reject" data-id="${x.id}">Rejeitar</button><button data-action="edit" data-id="${x.id}">Editar</button><button data-action="delete" data-id="${x.id}">Excluir</button>` : "Consulta"}</td></tr>`,
-    )
-    .join("");
-  for (const [id, fn] of [
-    ["adminPriority", (x) => x.criticality === "alto"],
-    ["adminAnalysis", (x) => x.moderation === "pending"],
-    ["adminService", (x) => x.status === "em_atendimento"],
-    ["adminResolved", (x) => x.status === "resolvido"],
-  ])
-    $(id).textContent = adminItems.filter(fn).length;
-}
-async function renderUsers() {
-  const users = await api("/users");
-  $("userManagement").innerHTML =
-    `<details class="panel"><summary>Gerenciar usuários e auditoria</summary><form id="newUser"><div class="form-grid"><div class="form-group"><label for="newName">Nome</label><input id="newName" required /></div><div class="form-group"><label for="newEmail">E-mail</label><input id="newEmail" type="email" required /></div><div class="form-group"><label for="newPassword">Senha inicial</label><input id="newPassword" type="password" minlength="10" required /></div><div class="form-group"><label for="newRole">Perfil</label><select id="newRole"><option value="manager">Gestor</option><option value="admin">Administrador</option><option value="citizen">Cidadão</option></select></div></div><button class="btn btn-primary">Criar usuário</button></form><div class="table-wrap"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Situação</th><th>Ação</th></tr></thead><tbody>${users.map((u) => `<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td><select id="role-${u.id}" aria-label="Perfil de ${esc(u.name)}">${["citizen", "manager", "admin"].map((r) => `<option ${r === u.role ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><select id="active-${u.id}" aria-label="Situação de ${esc(u.name)}"><option value="1" ${u.active ? "selected" : ""}>Ativo</option><option value="0" ${!u.active ? "selected" : ""}>Desativado</option></select></td><td><button data-user="${u.id}" ${u.id === user.id ? "disabled" : ""}>Salvar</button></td></tr>`).join("")}</tbody></table></div><button id="showAudit" class="btn btn-secondary">Consultar auditoria</button><pre id="auditOutput"></pre></details>`;
-  $("newUser").onsubmit = safe(async (e) => {
-    e.preventDefault();
-    await api("/users", "POST", {
-      name: $("newName").value,
-      email: $("newEmail").value,
-      password: $("newPassword").value,
-      role: $("newRole").value,
-    });
-    await renderUsers();
-    toast("Usuário criado.");
-  });
-  $("showAudit").onclick = safe(async () => {
-    $("auditOutput").textContent = JSON.stringify(await api("/audit"), null, 2);
-  });
+  const q = neighborhoodKey($("adminSearch").value);
+  const moderation = $("adminModeration").value;
+  const type = $("adminType").value;
+  const rows = adminItems.filter(x => neighborhoodKey(`${x.title} ${x.neighborhood} ${x.description}`).includes(q)
+      && (!moderation || x.moderation === moderation) && (!type || x.type === type))
+    .sort((a,b) => Number(b.moderation === "pending") - Number(a.moderation === "pending"));
+  $("adminResultCount").textContent = `${rows.length} de ${adminItems.length} relato(s)`;
+  $("adminTableBody").innerHTML = rows.map(x => `<tr><td><span class="record-type">${x.type === "alagamento" ? "Alagamento" : "Resíduos"} · ${formatDate(x.date)}</span><a class="record-title" href="#detalhe-${encodeURIComponent(x.id)}">${esc(x.title)}</a><small>${esc(x.neighborhood)}${x.imageUrl ? " · Foto anexada" : ""}</small>${occurrencePreview(x)}</td><td><span class="decision-badge ${x.moderation}">${decisions[x.moderation]}</span><small>${x.moderation !== "approved" ? (x.moderation === "pending" ? "Aguardando decisão" : "Não publicado") : x.status === "em_analise" ? "Atendimento não iniciado" : statuses[x.status]}</small>${x.reason ? `<small class="decision-reason">${esc(x.reason)}</small>` : ""}</td><td>${adminContribution(x)}</td><td><div class="moderation-actions">${user.role === "admin" ? `${x.moderation !== "approved" ? `<button class="approve-action" data-action="approve" data-id="${x.id}">Aprovar</button>` : ""}${x.moderation !== "rejected" ? `<button data-action="reject" data-id="${x.id}">Rejeitar</button>` : ""}<button data-action="edit" data-id="${x.id}">Editar</button><button class="delete-action" data-action="delete" data-id="${x.id}">Excluir</button>` : '<span class="ops-footnote">Acesso de consulta</span>'}</div></td></tr>`).join("")
+    || '<tr><td colspan="4"><div class="admin-empty"><strong>Nenhum relato encontrado.</strong><p>Altere os filtros ou registre uma ocorrência para iniciar a demonstração.</p></div></td></tr>';
+  $("adminAnalysis").textContent = adminItems.filter(x => x.moderation === "pending").length;
+  $("adminApproved").textContent = adminItems.filter(x => x.moderation === "approved" && inAnalysisPeriod(x)).length;
+  $("adminPriority").textContent = areas.filter(a => a.criticality === "alto").length;
+  $("adminResolved").textContent = adminItems.filter(x => x.moderation === "approved" && x.status === "resolvido").length;
 }
 async function route() {
   let r = location.hash.slice(1) || "home";
@@ -392,6 +583,7 @@ async function route() {
   if (r === "registrar") initPicker();
   if (r === "perfil") await profile();
   if (r === "gestao") await admin();
+  if (r === "criticidade") await refresh();
   if (r === "detalhe") {
     const x = await api("/occurrences/" + encodeURIComponent(detailId));
     $("occurrenceDetail").innerHTML =
@@ -414,6 +606,11 @@ document.addEventListener(
       );
     };
     window.addEventListener("hashchange", safe(route));
+    populateNeighborhoods();
+    $("filterNeighborhood").onchange = safe(async () => {
+      focusNeighborhood();
+      await filters();
+    });
     $("applyFilters").onclick = safe(filters);
     $("clearFilters").onclick = safe(async () => {
       [
@@ -422,6 +619,7 @@ document.addEventListener(
         "filterCriticality",
         "filterPeriod",
       ].forEach((id) => ($(id).value = ""));
+      focusNeighborhood();
       await filters();
     });
     $("retryMap").onclick = () => {
@@ -429,18 +627,28 @@ document.addEventListener(
       initMap();
     };
     $("adminSearch").oninput = adminTable;
-    $("geoButton").onclick = () => {
-      if (!navigator.geolocation)
-        return toast("Geolocalização indisponível. Preencha as coordenadas.");
-      navigator.geolocation.getCurrentPosition(
-        (p) => setPoint(p.coords.latitude, p.coords.longitude),
-        () =>
-          toast(
-            "Não foi possível obter a localização. Preencha as coordenadas.",
-          ),
-        { timeout: 8000 },
-      );
+    $("adminModeration").onchange = adminTable;
+    $("adminType").onchange = adminTable;
+    $("refreshAnalysis").onclick = safe(async () => {
+      const button = $("refreshAnalysis");
+      button.disabled = true;
+      try { await refresh(); toast("Indicadores atualizados com os relatos aprovados."); }
+      finally { button.disabled = false; }
+    });
+    $("geoButton").onclick = useCurrentLocation;
+    $("postalSearch").onclick = () => lookupAddress(true);
+    $("addressSearch").onclick = () => lookupAddress(false);
+    $("postalCode").oninput = () => {
+      const digits = $("postalCode").value.replace(/\D/g, "").slice(0, 8);
+      $("postalCode").value = digits.replace(/^(\d{5})(\d)/, "$1-$2");
     };
+    $("postalCode").onkeydown = e => {
+      if (e.key === "Enter") { e.preventDefault(); lookupAddress(true); }
+    };
+    ["latitude", "longitude"].forEach(id => $(id).addEventListener("change", () => {
+      const lat = Number($("latitude").value), lng = Number($("longitude").value);
+      if ($("latitude").value && $("longitude").value && Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) setPoint(lat, lng);
+    }));
     $("occurrenceDescription").oninput = () =>
       ($("descriptionCount").textContent = $(
         "occurrenceDescription",
@@ -587,6 +795,9 @@ document.addEventListener(
     };
     $("removePhoto").onclick = clearPhoto;
     $("occurrenceForm").addEventListener("reset", () => {
+      addressLookupVersion++;
+      ["postalSearch", "addressSearch"].forEach(id => $(id).disabled = false);
+      $("addressStatus").textContent = "Não sabe o CEP? Preencha a rua e o bairro abaixo.";
       clearPhoto();
       $("descriptionCount").textContent = "0";
       $("successMessage").classList.add("hidden");
@@ -596,8 +807,9 @@ document.addEventListener(
       }
     });
     $("exportCsv").onclick = () => {
-      location.href = "/api/reports?" + queryFilters() + "&format=csv";
+      location.href = "/api/reports?format=csv";
     };
+    document.addEventListener("click", handlePhotoPreview);
     $("adminTableBody").onclick = safe(async (e) => {
       const btn = e.target.closest("[data-action]");
       if (!btn) return;
@@ -616,32 +828,17 @@ document.addEventListener(
         openEditor(x);
         return;
       } else {
-        const reason = prompt(
-          "Justificativa da decisão (mínimo 3 caracteres):",
-        );
-        if (reason === null) return;
+        const reason = action === "approve"
+          ? "Registro aprovado pela administração."
+          : "Registro rejeitado pela administração.";
         await api("/occurrences/" + id + "/moderate", "POST", {
           moderation: action === "approve" ? "approved" : "rejected",
           reason,
         });
       }
-      await refresh();
       await admin();
-      toast("Alteração salva.");
+      toast("Alteração salva. Os indicadores de criticidade foram atualizados.");
     });
-    $("userManagement").addEventListener(
-      "click",
-      safe(async (e) => {
-        const b = e.target.closest("[data-user]");
-        if (!b) return;
-        await api("/users/" + b.dataset.user, "PATCH", {
-          role: $("role-" + b.dataset.user).value,
-          active: Number($("active-" + b.dataset.user).value),
-        });
-        await renderUsers();
-        toast("Usuário atualizado.");
-      }),
-    );
     await profile();
     await refresh();
     await route();
@@ -698,7 +895,6 @@ function openEditor(x) {
         : $("edit-" + k).value;
     await api("/occurrences/" + x.id, "PATCH", b);
     d.close();
-    await refresh();
     await admin();
     toast("Registro editado e enviado novamente à moderação.");
   });

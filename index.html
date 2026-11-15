@@ -11,6 +11,10 @@
     <title>AlagaManaus — Monitoramento Urbano</title>
     <link href="public/assets/leaflet.css" rel="stylesheet" />
     <link href="src/css/main.css" rel="stylesheet" />
+    <link href="src/css/account.css" rel="stylesheet" />
+    <link href="src/css/operations.css" rel="stylesheet" />
+    <link href="src/css/design-system.css" rel="stylesheet" />
+    <link href="src/css/workspace.css" rel="stylesheet" />
   </head>
   <body>
     <a class="skip-link" href="#main-content"
@@ -35,7 +39,7 @@
           ></span>
           <span>
             <strong>AlagaManaus</strong>
-            <small>Inteligência urbana colaborativa</small>
+            <small>Observatório colaborativo</small>
           </span>
         </a>
         <button
@@ -48,25 +52,17 @@
           <span class="sr-only">Abrir menu</span>
         </button>
         <nav aria-label="Navegação principal" class="main-nav" id="mainNav">
-          <a data-route="home" href="#home">Início</a>
+          <span class="nav-label">TERRITÓRIO</span><a data-route="home" href="#home">Visão geral</a>
           <a data-route="mapa" href="#mapa">Mapa</a>
           <a data-route="registrar" href="#registrar">Registrar ocorrência</a>
           <a data-route="criticidade" href="#criticidade">Criticidade</a>
-          <a data-route="gestao" href="#gestao">Gestão</a>
+          <span class="nav-label">ÁREA DE TRABALHO</span><a data-route="gestao" href="#gestao">Gestão</a>
           <a data-route="perfil" href="#perfil">Perfil</a>
-        </nav>
+        <a class="nav-help" href="#ajuda">Ajuda e privacidade <span>↗</span></a><div class="sidebar-note"><span class="status-dot"></span> Feito para Manaus<small>Participação que torna<br>a cidade mais visível.</small><span class="ods-tag">ODS 11 · Cidades sustentáveis</span></div></nav>
       </div>
     </header>
-    <div
-      aria-live="polite"
-      class="system-status"
-      id="systemStatus"
-      role="status"
-    >
-      <span aria-hidden="true" class="status-dot"></span>
-      Protótipo acadêmico · envios passam por moderação · índice operacional
-      provisório
-    </div>
+    <div class="workspace-topbar"><div><span class="workspace-location">MANAUS / AM</span><span class="workspace-divider">/</span><span id="currentSection">Visão geral</span></div><a href="#registrar" class="topbar-action">＋ Novo relato</a></div>
+    <div aria-live="polite" class="system-status" id="systemStatus" role="status"><span aria-hidden="true" class="status-dot"></span>Projeto acadêmico · Relatos publicados após análise</div>
     <main id="main-content" tabindex="-1">
       <!-- HOME -->
       <section
@@ -74,300 +70,20 @@
         class="page active-page"
         id="page-home"
       >
-        <div class="hero">
-          <div class="container hero-grid">
-            <div class="hero-copy">
-              <span class="eyebrow">TERRITÓRIO CONECTADO · MANAUS, AM</span>
-              <h1 id="homeTitle">
-                Uma cidade mais preparada começa com <em>informação.</em>
-              </h1>
-              <p>
-                Identifique alagamentos e descarte irregular de resíduos.
-                Acompanhe o que acontece no seu bairro e ajude a direcionar
-                atenção para onde ela é mais necessária.
-              </p>
-              <div class="hero-actions">
-                <a class="btn btn-primary" href="#registrar"
-                  >Registrar ocorrência</a
-                >
-                <a class="btn btn-secondary" href="#mapa">Ver mapa completo</a>
-              </div>
-              <div class="trust-row">
-                <span class="trust-line"></span
-                ><span
-                  >Participação cidadã. Decisões orientadas por dados.</span
-                >
-              </div>
-            </div>
-            <div
-              aria-label="Resumo de prioridades calculadas"
-              class="hero-map-card intelligence-card"
-            >
-              <div class="intelligence-top">
-                <span>OBSERVATÓRIO URBANO</span
-                ><span class="demo-chip">Demonstração</span>
-              </div>
-              <div class="intelligence-title">
-                <h2>O território em perspectiva.</h2>
-                <p>Cada registro ajuda a compreender o próximo passo.</p>
-              </div>
-              <div class="priority-spotlight">
-                <div>
-                  <span class="light-label">Maior índice atual</span
-                  ><strong id="heroPriorityName">Sem dados</strong
-                  ><span class="badge critico">Sem dados</span>
-                </div>
-                <div class="hero-score">
-                  <strong>—</strong><small>de 100</small>
-                </div>
-              </div>
-              <div class="board-caption">
-                <span>ATENÇÃO PRIORITÁRIA</span><span>ÍNDICE</span>
-              </div>
-              <div id="homePriorities"></div>
-              <a class="board-link" href="#mapa"
-                >Explorar ocorrências no mapa
-                <span aria-hidden="true">↗</span></a
-              >
-            </div>
+        <div class="container dashboard-home">
+          <div class="welcome-heading"><div><span class="eyebrow">A CIDADE, EM PERSPECTIVA</span><h1 id="homeTitle">Cada relato conta.<br><span>Cada bairro importa.</span></h1><p>Um olhar coletivo sobre alagamentos e resíduos em Manaus.<br class="desktop-break"> Acompanhe o território. Faça parte da mudança.</p></div><a class="btn btn-primary" href="#registrar"><span aria-hidden="true">＋</span> Registrar ocorrência</a></div>
+          <div class="overview-metrics stats-grid" aria-label="Indicadores de relatos aprovados">
+            <article class="stat-card"><span class="metric-heading">Ocorrências mapeadas <span class="metric-symbol">⌖</span></span><strong class="metric-value" id="statTotal">0</strong><span class="metric-description">Relatos aprovados no território</span></article>
+            <article class="stat-card attention"><span class="metric-heading">Áreas prioritárias <span class="metric-symbol">↗</span></span><strong class="metric-value" id="statCritical">0</strong><span class="metric-description">Alta criticidade · últimos 90 dias</span></article>
+            <article class="stat-card"><span class="metric-heading">Atendimentos concluídos <span class="metric-symbol">✓</span></span><strong class="metric-value" id="statResolved">0</strong><span class="metric-description">Relatos marcados como resolvidos</span></article>
+            <article class="stat-card"><span class="metric-heading">Bairro com mais relatos <span class="metric-symbol">◇</span></span><strong class="metric-value neighborhood-value" id="statNeighborhood">—</strong><span class="metric-description">Considerando todo o histórico</span></article>
           </div>
-        </div>
-        <div aria-labelledby="panoramaTitle" class="container home-panorama">
-          <div class="section-heading">
-            <div>
-              <span class="eyebrow">Panorama do território</span>
-              <h2 id="panoramaTitle">Indicadores gerais</h2>
-            </div>
-            <span class="sample-label"
-              ><span aria-hidden="true"></span>Ocorrências aprovadas</span
-            >
+          <div class="territory-dashboard">
+            <article class="territory-card"><div class="card-heading"><div><span class="eyebrow">EXPLORE O TERRITÓRIO</span><h2>O que acontece em Manaus</h2></div><a href="#mapa" class="text-link">Abrir mapa ↗</a></div><div class="home-map-wrap"><div id="homeMap" aria-label="Prévia do mapa de Manaus"></div><div id="homeMapFallback" class="home-map-fallback hidden"><strong>O território continua aqui.</strong><p>O mapa precisa de conexão. Você pode consultar os relatos abaixo.</p><button type="button" class="btn btn-secondary" id="retryHomeMap">Recarregar mapa</button></div><a href="#mapa" class="map-explore-pill">⌖ Explorar bairros e ocorrências <span>→</span></a></div><div class="map-caption"><span><i></i> Somente registros aprovados</span><span>Manaus, Amazonas</span></div></article>
+            <aside class="priority-panel"><span class="eyebrow">ATENÇÃO AO TERRITÓRIO</span><h2>Onde olhar primeiro?</h2><p>Prioridade calculada com relatos dos últimos 90 dias.</p><div class="priority-spotlight"><div class="hero-score"><strong>—</strong><small>de 100 pontos</small></div><div><strong id="heroPriorityName">Sem dados</strong><span class="badge sem_dados">Sem dados</span></div></div><p class="priority-note">O índice organiza o acompanhamento. Não é uma previsão de alagamentos.</p><a class="btn btn-secondary btn-full" href="#criticidade">Entender a criticidade <span>↗</span></a></aside>
           </div>
-          <div class="stats-grid overview-metrics">
-            <article class="stat-card metric-territory">
-              <div class="metric-heading">
-                <span class="metric-icon"
-                  ><svg
-                    aria-hidden="true"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.6"
-                    viewbox="0 0 24 24"
-                    width="24"
-                  >
-                    <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"></path>
-                    <path d="M9 3v15M15 6v15"></path></svg
-                ></span>
-                <h3>Pontos mapeados</h3>
-              </div>
-              <strong class="metric-value" id="statTotal">0</strong>
-              <p class="metric-description">Registros presentes no mapa</p>
-            </article>
-            <article class="stat-card metric-attention">
-              <div class="metric-heading">
-                <span class="metric-icon"
-                  ><svg
-                    aria-hidden="true"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.6"
-                    viewbox="0 0 24 24"
-                    width="24"
-                  >
-                    <path d="m12 3 10 18H2Z"></path>
-                    <path d="M12 9v5M12 17h.01"></path></svg
-                ></span>
-                <h3>Áreas de alta criticidade</h3>
-              </div>
-              <strong class="metric-value" id="statCritical">0</strong>
-              <p class="metric-description">Locais que exigem maior atenção</p>
-            </article>
-            <article class="stat-card metric-district">
-              <div class="metric-heading">
-                <span class="metric-icon"
-                  ><svg
-                    aria-hidden="true"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.6"
-                    viewbox="0 0 24 24"
-                    width="24"
-                  >
-                    <path
-                      d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"
-                    ></path>
-                    <circle cx="12" cy="10" r="2.5"></circle></svg
-                ></span>
-                <h3>Bairro mais afetado</h3>
-              </div>
-              <strong class="metric-value" id="statNeighborhood">—</strong>
-              <p class="metric-description">Maior concentração de registros</p>
-            </article>
-            <article class="stat-card metric-complete">
-              <div class="metric-heading">
-                <span class="metric-icon"
-                  ><svg
-                    aria-hidden="true"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.6"
-                    viewbox="0 0 24 24"
-                    width="24"
-                  >
-                    <circle cx="12" cy="12" r="9"></circle>
-                    <path d="m8 12 3 3 5-6"></path></svg
-                ></span>
-                <h3>Ocorrências resolvidas</h3>
-              </div>
-              <strong class="metric-value" id="statResolved">0</strong>
-              <p class="metric-description">
-                Atendimentos marcados como concluídos
-              </p>
-            </article>
-          </div>
-          <div class="panorama-footnote">
-            <p>
-              Uma visão dos registros aprovados para acompanhar o território e
-              suas prioridades.
-            </p>
-            <a href="#mapa"
-              >Explorar o mapa
-              <svg
-                aria-hidden="true"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.6"
-                viewbox="0 0 24 24"
-                width="24"
-              >
-                <path d="M4 12h16m-6-6 6 6-6 6"></path></svg
-            ></a>
-          </div>
-        </div>
-        <div aria-labelledby="processTitle" class="container home-process">
-          <div class="process-intro">
-            <div>
-              <span class="eyebrow">Como funciona</span>
-              <h2 id="processTitle">Do registro<br />à priorização.</h2>
-            </div>
-            <p>
-              Informação que conecta a participação cidadã à atenção ao
-              território.
-            </p>
-          </div>
-          <ol class="process-track">
-            <li class="process-step">
-              <div class="process-node">
-                <span class="process-icon"
-                  ><svg
-                    aria-hidden="true"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.6"
-                    viewbox="0 0 24 24"
-                    width="24"
-                  >
-                    <path
-                      d="M13 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-8"
-                    ></path>
-                    <path d="m17 3 4 4-10 10-5 1 1-5Z"></path></svg></span
-                ><span class="process-number">01</span>
-              </div>
-              <span class="process-tag">Participação cidadã</span>
-              <h3>Registre</h3>
-              <p>
-                Informe a localização, descreva o problema e acrescente uma foto
-                da ocorrência.
-              </p>
-            </li>
-            <li class="process-step">
-              <div class="process-node">
-                <span class="process-icon"
-                  ><svg
-                    aria-hidden="true"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.6"
-                    viewbox="0 0 24 24"
-                    width="24"
-                  >
-                    <path
-                      d="M4 3v17h17M8 15v-4M13 15V7M18 15v-7"
-                    ></path></svg></span
-                ><span class="process-number">02</span>
-              </div>
-              <span class="process-tag">Análise do território</span>
-              <h3>Classifique</h3>
-              <p>
-                A análise considera eventos aprovados de alagamento e descarte
-                irregular em células de 250 metros.
-              </p>
-            </li>
-            <li class="process-step">
-              <div class="process-node">
-                <span class="process-icon"
-                  ><svg
-                    aria-hidden="true"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.6"
-                    viewbox="0 0 24 24"
-                    width="24"
-                  >
-                    <path
-                      d="m12 3 10 5-10 5L2 8ZM2 12l10 5 10-5M2 16l10 5 10-5"
-                    ></path></svg></span
-                ><span class="process-number">03</span>
-              </div>
-              <span class="process-tag">Acompanhamento</span>
-              <h3>Priorize</h3>
-              <p>
-                Gestores consultam os pontos de maior atenção e acompanham o
-                atendimento.
-              </p>
-            </li>
-          </ol>
-          <div class="process-bottom">
-            <span>Seu registro é o primeiro passo.</span
-            ><a href="#registrar"
-              >Registrar uma ocorrência
-              <svg
-                aria-hidden="true"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.6"
-                viewbox="0 0 24 24"
-                width="24"
-              >
-                <path d="M4 12h16m-6-6 6 6-6 6"></path></svg
-            ></a>
-          </div>
+          <div class="home-bottom-grid"><article class="recent-panel"><div class="card-heading"><div><span class="eyebrow">PARTICIPAÇÃO CIDADÃ</span><h2>Últimos relatos aprovados</h2></div><a href="#mapa" class="text-link">Ver todos ↗</a></div><div id="homePriorities"></div></article><article class="participation-card"><span class="eyebrow">SEU BAIRRO TEM VOZ</span><h2>Viu um problema?<br>Coloque no mapa.</h2><p>Marque o local, descreva a situação e, se puder, envie uma foto. Você também pode participar sem criar uma conta.</p><a href="#registrar">Fazer meu primeiro relato <span>→</span></a><svg viewBox="0 0 300 90" fill="none" aria-hidden="true"><path d="M-10 70Q50 0 100 40T200 30T320 20M-10 85Q50 15 100 55T200 45T320 35M-10 100Q50 30 100 70T200 60T320 50" stroke="currentColor" stroke-width="1.5"/></svg></article></div>
+          <div class="journey-strip"><span>DO RELATO AO MAPA</span><div><b>01</b> Você registra</div><i>→</i><div><b>02</b> O relato é analisado</div><i>→</i><div><b>03</b> A cidade ganha informação</div></div>
         </div>
       </section>
       <!-- MAPA -->
@@ -376,7 +92,7 @@
           <div class="section-heading">
             <div>
               <span class="eyebrow">Explorar o território</span>
-              <h1 id="mapTitle">Mapa interativo de ocorrências</h1>
+              <h1 id="mapTitle">Explore o território</h1>
             </div>
             <p>
               Encontre registros por bairro, período e prioridade. Consulte
@@ -477,7 +193,7 @@
           <div class="section-heading">
             <div>
               <span class="eyebrow">Participação cidadã</span>
-              <h1 id="registerTitle">Registrar nova ocorrência</h1>
+              <h1 id="registerTitle">O que aconteceu no seu bairro?</h1>
             </div>
             <p>
               Conte o que aconteceu. Os campos com asterisco são obrigatórios.
@@ -485,6 +201,16 @@
           </div>
           <form class="form-card" id="occurrenceForm">
             <div class="form-grid">
+              <div class="form-group full">
+                <h2>Onde aconteceu?</h2>
+                <p>Busque pelo CEP ou informe a rua e o bairro. Depois, ajuste o ponto no mapa.</p>
+                <label for="postalCode">CEP (opcional)</label>
+                <div class="inline-field">
+                  <input id="postalCode" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" aria-describedby="addressStatus" />
+                  <button class="btn btn-secondary" id="postalSearch" type="button">Buscar CEP</button>
+                </div>
+                <small id="addressStatus" role="status" aria-live="polite">Não sabe o CEP? Preencha a rua e o bairro abaixo.</small>
+              </div>
               <div class="form-group full">
                 <label for="locationText">Rua ou ponto de referência *</label>
                 <div class="inline-field">
@@ -505,8 +231,7 @@
                   </button>
                 </div>
                 <small id="locationHelp"
-                  >Informe o nome da rua ou um ponto de referência. Depois,
-                  marque o local no mapa ou preencha as coordenadas.</small
+                  >Informe a rua e o bairro e clique em “Localizar endereço no mapa”, ou use sua localização atual.</small
                 >
                 <div class="field-error" id="locationError"></div>
               </div>
@@ -570,10 +295,8 @@
                 />
               </div>
               <div class="form-group full">
-                <p>
-                  Selecione no mapa ou preencha as coordenadas. Também é
-                  possível registrar sem usar o mouse.
-                </p>
+                <button class="btn btn-secondary" id="addressSearch" type="button">Localizar endereço no mapa</button>
+                <p>O resultado da busca é aproximado. Clique no ponto exato ou arraste o marcador. As coordenadas são preenchidas automaticamente; você também pode digitá-las.</p>
                 <div id="pickerMap" style="height: 300px"></div>
               </div>
               <div class="form-group full">
@@ -685,6 +408,8 @@
               acompanhamento.
             </p>
           </div>
+          <div class="analysis-period"><span class="period-dot" aria-hidden="true"></span><strong>Eventos dos últimos 90 dias</strong><span id="analysisDateRange"></span><button class="btn btn-secondary" id="refreshAnalysis" type="button">Atualizar dados</button></div>
+          <div class="ops-metrics analysis-metrics"><div><small>Relatos no cálculo</small><strong id="analysisIncluded">0</strong><span>Aprovados e dentro do período</span></div><div><small>Áreas com registros</small><strong id="analysisAreas">0</strong><span>Células de 250 × 250 metros</span></div><div><small>Áreas recorrentes</small><strong id="analysisRecurring">0</strong><span>Alagamentos em datas diferentes</span></div><div><small>Aprovados fora do período</small><strong id="analysisHistorical">0</strong><span>Visíveis no mapa, sem pontuar agora</span></div></div>
           <div class="criticality-grid">
             <article class="score-card">
               <div class="score-card-top">
@@ -719,7 +444,7 @@
                 <div>
                   <h3>Alagamentos têm mais peso</h3>
                   <p>
-                    Relatos de água acumulada contribuem mais para a pontuação.
+                    Cada alagamento aprovado soma 14 pontos, até o limite de 70 pontos por área.
                   </p>
                 </div>
               </div>
@@ -728,7 +453,7 @@
                 <div>
                   <h3>Resíduos complementam a análise</h3>
                   <p>
-                    O descarte irregular também conta para a prioridade da área.
+                    Cada relato aprovado de resíduos soma 6 pontos, até o limite de 30 pontos por área.
                   </p>
                 </div>
               </div>
@@ -737,8 +462,7 @@
                 <div>
                   <h3>Repetição em dias diferentes merece atenção</h3>
                   <p>
-                    Dois ou mais alagamentos em datas diferentes indicam
-                    recorrência na área.
+                    Dois ou mais alagamentos em datas diferentes sinalizam recorrência. Esse sinal não acrescenta pontos extras.
                   </p>
                 </div>
               </div>
@@ -753,6 +477,7 @@
                   <strong>Alta</strong><span>60 a 100 pontos</span>
                 </div>
               </div>
+              <div class="formula-example"><strong>Exemplo de simulação</strong><p>Na mesma área: 1 alagamento = 14 pontos (baixa); 3 alagamentos = 42 (moderada); 5 alagamentos = 70 (alta). Os relatos precisam ser aprovados e ter data no período. Use eventos distintos: duplicatas do mesmo tipo, dia e local são bloqueadas.</p></div>
               <p class="index-note">
                 Sem relatos, mostramos “Sem dados”. Isso não significa que o
                 local esteja seguro. A pontuação ajuda a organizar a atenção e
@@ -767,68 +492,29 @@
                 <h2>Áreas que merecem acompanhamento</h2>
               </div>
             </div>
-            <div class="ranking-list" id="rankingList"></div>
+            <p class="ops-footnote">Cada linha representa uma área, não uma rua ou um bairro inteiro. A classificação é calculada com os mesmos dados exibidos na gestão.</p><div class="ranking-list" id="rankingList"></div>
           </div>
         </div>
       </section>
       <!-- GESTÃO -->
       <section aria-labelledby="managementTitle" class="page" id="page-gestao">
         <div class="container section-block">
-          <div class="section-heading">
-            <div>
-              <span class="eyebrow">Gestão pública</span>
-              <h1 id="managementTitle">Painel administrativo</h1>
+          <div class="ops-heading"><div><span class="eyebrow">CENTRAL DE OPERAÇÕES</span><h1 id="managementTitle">Painel administrativo</h1><p>Analise os relatos. Transforme registros em informação para o território.</p></div><div class="ops-actions"><a class="btn btn-secondary" href="#criticidade">Ver criticidade ↗</a><button class="btn btn-primary" id="exportCsv">Exportar aprovados · CSV</button></div></div>
+          <p id="managementAccess" class="access-note" role="status"></p>
+          <div id="managementContent" class="hidden">
+            <div class="admin-summary ops-metrics">
+              <div><small>Aguardando análise</small><strong id="adminAnalysis">0</strong><span>Relatos que precisam de uma decisão</span></div>
+              <div><small>Aprovados no período</small><strong id="adminApproved">0</strong><span>Eventos dos últimos 90 dias</span></div>
+              <div><small>Áreas de alta criticidade</small><strong id="adminPriority">0</strong><span>Mesma contagem do painel de criticidade</span></div>
+              <div><small>Atendimentos concluídos</small><strong id="adminResolved">0</strong><span>Relatos aprovados com status resolvido</span></div>
             </div>
-            <div class="heading-actions">
-              <button class="btn btn-secondary" id="exportCsv">
-                Exportar relatório CSV
-              </button>
+            <div class="ops-bridge"><div><span class="eyebrow">DA ANÁLISE AO ÍNDICE</span><h2>Uma decisão aqui atualiza o panorama.</h2><p>Relatos aprovados com data nos últimos 90 dias entram no cálculo da área. Pendentes e rejeitados não pontuam. Resolver o atendimento não apaga o histórico do período.</p></div><a href="#criticidade">Entender a pontuação <span aria-hidden="true">↗</span></a></div>
+            <div class="ops-registers">
+              <div class="ops-register-heading"><div><h2>Central de relatos</h2><p>Confira a localização, a descrição e a foto antes de decidir.</p></div><span id="adminResultCount" role="status"></span></div>
+              <div class="ops-filters"><div><label for="adminSearch">Buscar ocorrência</label><input id="adminSearch" placeholder="Rua, bairro ou descrição" type="search" /></div><div><label for="adminModeration">Análise</label><select id="adminModeration"><option value="">Todas as situações</option><option value="pending">Aguardando análise</option><option value="approved">Aprovadas</option><option value="rejected">Rejeitadas</option></select></div><div><label for="adminType">Tipo</label><select id="adminType"><option value="">Todos os tipos</option><option value="alagamento">Alagamento</option><option value="residuo">Descarte de resíduos</option></select></div></div>
+              <div aria-label="Relatos e contribuição para a criticidade" class="table-wrap" tabindex="0"><table><thead><tr><th>Ocorrência</th><th>Análise e atendimento</th><th>Contribuição ao índice</th><th>Ações</th></tr></thead><tbody id="adminTableBody"></tbody></table></div>
+              <p class="ops-footnote">Os indicadores acima representam a base completa; os filtros alteram somente a lista. O CSV exporta os relatos aprovados de todo o histórico.</p>
             </div>
-          </div>
-          <div class="admin-summary">
-            <div>
-              <small>Pontos prioritários</small
-              ><strong id="adminPriority">0</strong>
-            </div>
-            <div>
-              <small>Em análise</small><strong id="adminAnalysis">0</strong>
-            </div>
-            <div>
-              <small>Em atendimento</small><strong id="adminService">0</strong>
-            </div>
-            <div>
-              <small>Resolvidos</small><strong id="adminResolved">0</strong>
-            </div>
-          </div>
-          <div class="table-toolbar">
-            <label for="adminSearch">Buscar ponto</label>
-            <input
-              id="adminSearch"
-              placeholder="Digite bairro ou local"
-              type="search"
-            />
-          </div>
-          <p id="managementAccess" role="status"></p>
-          <div id="userManagement"></div>
-          <div
-            aria-label="Tabela de pontos priorizados"
-            class="table-wrap"
-            tabindex="0"
-          >
-            <table>
-              <thead>
-                <tr>
-                  <th>Prioridade</th>
-                  <th>Local</th>
-                  <th>Bairro</th>
-                  <th>Tipo</th>
-                  <th>Criticidade</th>
-                  <th>Status</th>
-                  <th>Ação</th>
-                </tr>
-              </thead>
-              <tbody id="adminTableBody"></tbody>
-            </table>
           </div>
         </div>
       </section>
@@ -836,27 +522,25 @@
       <section aria-label="Minha conta" class="page" id="page-perfil">
         <div class="container section-block">
           <div class="guest-account panel" id="profileGuest">
-            <span class="eyebrow">Sua participação faz diferença</span>
-            <h1>Um espaço para acompanhar seus relatos</h1>
-            <p>
-              Com uma conta, você reúne suas ocorrências e acompanha as decisões
-              de análise em um só lugar.
-            </p>
-            <div class="guest-benefits">
-              <span>Histórico dos seus envios</span
-              ><span>Situação de cada ocorrência</span
-              ><span>Dados de acesso sob seu controle</span>
+            <div class="guest-welcome">
+              <span class="account-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 3C13 8 7 13 7 18a9 9 0 0 0 18 0C25 13 19 8 16 3Z"/><path d="M8 19q4-4 8 0t8 0"/></svg></span>
+              <span class="eyebrow">SEU ESPAÇO NO ALAGAMANAUS</span>
+              <h1>Sua participação.<br /><em>Uma cidade mais informada.</em></h1>
+              <p>Reúna seus relatos, acompanhe cada análise e mantenha sua contribuição para Manaus em um só lugar.</p>
+              <div class="guest-cta"><a class="btn btn-primary" href="#cadastro">Criar minha conta <span aria-hidden="true">↗</span></a><a class="btn btn-secondary" href="#login">Já tenho uma conta</a></div>
+              <small class="account-caption">Nome de exibição, e-mail e senha. Apenas o essencial.</small>
             </div>
-            <div class="form-actions">
-              <a class="btn btn-primary" href="#cadastro">Criar minha conta</a
-              ><a class="btn btn-secondary" href="#login">Já tenho uma conta</a>
+            <div class="guest-overview">
+              <span class="eyebrow">PARTICIPE E ACOMPANHE</span>
+              <h2>Seu relato não termina no envio.</h2>
+              <p>Uma área pessoal para acompanhar o que acontece depois.</p>
+              <ol class="account-benefits">
+                <li><span aria-hidden="true">01</span><div><h3>Histórico organizado</h3><p>Consulte os registros que você enviou enquanto estava conectado à sua conta.</p></div></li>
+                <li><span aria-hidden="true">02</span><div><h3>Análise com transparência</h3><p>Veja se o relato aguarda análise, foi aprovado ou precisa de ajustes.</p></div></li>
+                <li><span aria-hidden="true">03</span><div><h3>Identificação reservada</h3><p>Seu nome e e-mail não são exibidos junto às ocorrências no mapa público.</p></div></li>
+              </ol>
+              <div class="guest-anonymous"><strong>Quer apenas registrar um problema?</strong><a href="#registrar">Continue com um relato anônimo <span aria-hidden="true">↗</span></a></div>
             </div>
-            <p class="guest-note">
-              Prefere não se identificar?
-              <a href="#registrar"
-                >Você também pode enviar um relato anônimo.</a
-              >
-            </p>
           </div>
           <div class="hidden" id="profileAuthenticated">
             <div class="profile-header-card account-header">
@@ -911,6 +595,7 @@
               <div class="timeline" id="profileOccurrences"></div>
             </section>
             <section class="panel hidden" id="profileAccount">
+              <span class="eyebrow">PERFIL E ACESSO</span>
               <h2>Dados da conta</h2>
               <p>
                 Atualize como você aparece no seu perfil e seus dados de acesso.
@@ -975,8 +660,9 @@
         <div class="container section-block">
           <div class="account-layout">
             <aside class="account-intro">
+              <span class="account-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 3C13 8 7 13 7 18a9 9 0 0 0 18 0C25 13 19 8 16 3Z"/><path d="M8 19q4-4 8 0t8 0"/></svg></span>
               <span class="eyebrow">Bem-vindo de volta</span>
-              <h1>Acompanhe sua contribuição para Manaus</h1>
+              <h1>Sua contribuição<br /><em>tem um lugar aqui.</em></h1>
               <p>
                 Entre para consultar seus relatos e acompanhar as decisões de
                 moderação.
@@ -989,7 +675,7 @@
               <a href="#registrar">Continuar com um relato anônimo</a>
             </aside>
             <div class="auth-panel panel">
-              <h2>Entrar na minha conta</h2>
+              <a class="account-back" href="#perfil"><span aria-hidden="true">←</span> Área pessoal</a><span class="eyebrow">ACESSO À CONTA</span><h2>Bem-vindo de volta.</h2>
               <p>Use seu e-mail e sua senha.</p>
               <form id="authForm">
                 <div class="form-group">
@@ -1037,8 +723,9 @@
         <div class="container section-block">
           <div class="account-layout">
             <aside class="account-intro">
+              <span class="account-symbol" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 3C13 8 7 13 7 18a9 9 0 0 0 18 0C25 13 19 8 16 3Z"/><path d="M8 19q4-4 8 0t8 0"/></svg></span>
               <span class="eyebrow">Participação cidadã</span>
-              <h1>Sua conta, seus relatos, seu acompanhamento</h1>
+              <h1>Um passo para<br /><em>participar mais.</em></h1>
               <p>
                 Precisamos apenas de um nome de exibição, e-mail e senha. Não
                 pedimos CPF, telefone ou endereço residencial.
@@ -1053,12 +740,13 @@
               <a href="#registrar">Prefiro registrar sem criar uma conta</a>
             </aside>
             <div class="auth-panel panel">
-              <h2>Criar minha conta</h2>
+              <a class="account-back" href="#perfil"><span aria-hidden="true">←</span> Área pessoal</a><span class="eyebrow">COMECE POR AQUI</span><h2>Crie sua conta.</h2><p>Preencha seus dados para acompanhar seus relatos.</p>
               <form id="registerForm">
                 <div class="form-group">
                   <label for="registerName">Como você quer ser chamado? *</label
                   ><input
                     autocomplete="nickname"
+                    placeholder="Seu nome de exibição"
                     id="registerName"
                     maxlength="100"
                     minlength="2"
@@ -1069,6 +757,7 @@
                   <label for="registerEmail">E-mail *</label
                   ><input
                     autocomplete="email"
+                    placeholder="voce@exemplo.com"
                     id="registerEmail"
                     maxlength="150"
                     required=""
@@ -1080,6 +769,7 @@
                   <div class="password-field">
                     <input
                       autocomplete="new-password"
+                      aria-describedby="passwordHint"
                       id="registerPassword"
                       maxlength="128"
                       minlength="10"
@@ -1093,18 +783,20 @@
                       Mostrar
                     </button>
                   </div>
-                  <small>Use pelo menos 10 caracteres.</small>
+                  <small id="passwordHint" aria-live="polite">Use pelo menos 10 caracteres.</small>
                 </div>
                 <div class="form-group">
-                  <label for="registerConfirm">Confirme a senha *</label
-                  ><input
+                  <label for="registerConfirm">Confirme a senha *</label>
+                  <div class="password-field"><input
                     autocomplete="new-password"
+                    aria-describedby="confirmHint"
                     id="registerConfirm"
                     maxlength="128"
                     minlength="10"
                     required=""
                     type="password"
-                  />
+                  /><button aria-label="Mostrar confirmação de senha" data-toggle-password="registerConfirm" type="button">Mostrar</button></div>
+                  <small id="confirmHint" aria-live="polite">Repita a senha escolhida.</small>
                 </div>
                 <label class="privacy-check"
                   ><input
@@ -1188,6 +880,9 @@
     </footer>
     <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
     <script src="public/assets/leaflet.js"></script>
+    <script src="src/js/neighborhoods.js"></script>
+    <script src="src/js/workspace.js"></script>
     <script src="src/js/app.js"></script>
+    <script src="src/js/account-ui.js"></script>
   </body>
 </html>

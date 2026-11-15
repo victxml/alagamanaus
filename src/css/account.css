@@ -1,0 +1,117 @@
+/* Área pessoal: componentes de acesso e acompanhamento. */
+:is(#page-perfil,#page-login,#page-cadastro){background:#f4f7f5;color:#193f39}
+:is(#page-perfil,#page-login,#page-cadastro)>.container{padding-top:48px;padding-bottom:56px}
+:is(#page-perfil,#page-login,#page-cadastro) .btn{border-radius:7px;min-height:47px;font-size:.83rem;display:inline-flex;justify-content:center;align-items:center;gap:18px;text-decoration:none;line-height:1.5}
+:is(#page-perfil,#page-login,#page-cadastro) .btn-primary{background:#175b49;border:1px solid #175b49;color:#fff}
+:is(#page-perfil,#page-login,#page-cadastro) .btn-primary:hover{background:#104434}
+:is(#page-perfil,#page-login,#page-cadastro) .btn-secondary{border-color:#ccdbd2;color:#275b46;background:#fff}
+:is(#page-perfil,#page-login,#page-cadastro) .btn-secondary:hover{background:#edf5ef}
+:is(#page-perfil,#page-login,#page-cadastro) .eyebrow{font-size:.61rem;letter-spacing:.15em;font-weight:650;color:#527b64}
+.account-symbol{width:51px;height:51px;border:1px solid #688b7b;background:#ffffff09;display:grid;place-items:center;border-radius:13px;color:#c1e7d0;margin-bottom:35px}
+.account-symbol svg{width:29px;height:29px}
+#page-perfil .guest-account{display:grid;grid-template-columns:1.05fr 1fr;max-width:1120px;padding:0;overflow:hidden;border:1px solid #d9e4dc;border-radius:14px;box-shadow:0 16px 50px #173a2b06}
+.guest-welcome{position:relative;isolation:isolate;background:#103b35;padding:43px 44px 40px;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.guest-welcome::after,.account-intro::after{content:"";position:absolute;z-index:-1;width:390px;height:390px;right:-200px;bottom:-180px;border:1px solid #92bba52b;box-shadow:0 0 0 30px #92bba50d,0 0 0 60px #92bba50b,0 0 0 90px #92bba50a,0 0 0 120px #92bba508;border-radius:50%;pointer-events:none}
+#page-perfil .guest-welcome .eyebrow{color:#a2cbb3;font-size:.57rem;letter-spacing:.14em}
+#page-perfil .guest-welcome h1{color:#f7faf5;font-size:clamp(2rem,3vw,2.7rem);font-weight:550;line-height:1.16;letter-spacing:-.04em;margin:23px 0 19px}
+.guest-welcome h1 em{font-weight:450;font-style:normal;color:#b1ddc0}
+#page-perfil .guest-welcome p{color:#c0d4c6;font-size:.88rem;line-height:1.9;margin:0 0 29px;max-width:410px}
+.guest-cta{display:flex;gap:10px;flex-wrap:wrap}
+#page-perfil .guest-cta .btn-primary{background:#bce3c7;color:#173e2d;border-color:#bce3c7}
+#page-perfil .guest-cta .btn-primary:hover{background:#d3eedb}
+#page-perfil .guest-cta .btn-secondary{color:#e7f3eb;border-color:#729784;background:transparent}
+#page-perfil .guest-cta .btn-secondary:hover{background:#ffffff0d}
+.account-caption{font-size:.65rem;color:#a7c5b2;line-height:1.7;display:block;margin-top:20px}
+.guest-overview{padding:47px 40px 33px;background:#fff}
+.guest-overview h2{font-size:1.65rem;line-height:1.23;font-weight:600;letter-spacing:-.03em;margin:15px 0 12px;color:#214b38;max-width:330px}
+.guest-overview>p{font-size:.82rem;color:#718276;line-height:1.8;margin:0 0 24px}
+.account-benefits{list-style:none;margin:0;padding:0}
+.account-benefits li{display:flex;gap:16px;align-items:flex-start;padding:18px 0;border-top:1px solid #e9eee9}
+.account-benefits li>span{display:grid;place-items:center;width:30px;height:30px;flex:none;background:#eff5ee;color:#4a7758;border:1px solid #e0eadd;border-radius:8px;font-size:.64rem}
+.account-benefits h3{font-size:.85rem;font-weight:650;letter-spacing:0;margin:0 0 5px;color:#294d38}
+.account-benefits p{font-size:.75rem;color:#718176;line-height:1.8;margin:0}
+.guest-anonymous{border-top:1px solid #e1e9e1;padding-top:21px;margin-top:8px;display:grid;gap:8px}
+.guest-anonymous strong{font-size:.73rem;color:#617a67;font-weight:500}
+.guest-anonymous a{font-size:.75rem;color:#316a48;text-decoration:none;display:flex;justify-content:space-between;gap:12px}
+.guest-anonymous a:hover{text-decoration:underline}
+:is(#page-login,#page-cadastro) .account-layout{display:grid;grid-template-columns:1fr 1fr;gap:0;max-width:1000px;border:1px solid #d9e4dc;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 16px 50px #173a2b06;align-items:stretch}
+:is(#page-login,#page-cadastro) .account-intro{position:relative;isolation:isolate;overflow:hidden;background:#103b35;padding:44px 40px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+:is(#page-login,#page-cadastro) .account-intro .eyebrow{color:#a2cbb3;font-size:.59rem}
+:is(#page-login,#page-cadastro) .account-intro h1{font-size:2.4rem;font-weight:550;line-height:1.15;color:#f7faf5;letter-spacing:-.04em;margin:22px 0}
+.account-intro h1 em{font-style:normal;color:#b1ddc0;font-weight:450}
+:is(#page-login,#page-cadastro) .account-intro>p{color:#c0d4c6;font-size:.85rem;line-height:1.85;margin:0}
+:is(#page-login,#page-cadastro) .account-intro ul{list-style:none;color:#bad2c2;padding:0;margin:27px 0;font-size:.77rem;line-height:1.7;display:grid;gap:15px}
+.account-intro li{padding-left:22px;position:relative}
+.account-intro li::before{content:"✓";position:absolute;left:0;color:#a7d8b8}
+:is(#page-login,#page-cadastro) .account-intro>a{margin-top:24px;font-size:.72rem;color:#cae8d3;text-underline-offset:4px}
+:is(#page-login,#page-cadastro) .auth-panel{border:0;border-radius:0;box-shadow:none;padding:38px 40px;background:#fff;min-width:0}
+.account-back{display:flex;align-items:center;gap:9px;margin-bottom:31px;text-decoration:none;color:#6c8070;font-size:.72rem}
+.account-back:hover{text-decoration:underline}
+.auth-panel>.eyebrow{display:block;margin-bottom:12px}
+:is(#page-login,#page-cadastro) .auth-panel h2{font-size:1.8rem;letter-spacing:-.04em;font-weight:600;line-height:1.2;color:#214b38;margin:0 0 11px}
+:is(#page-login,#page-cadastro) .auth-panel>p{font-size:.8rem;color:#758578;line-height:1.7;margin:0 0 25px}
+:is(#page-login,#page-cadastro) .auth-panel .form-group{margin:20px 0}
+:is(#page-login,#page-cadastro,#page-perfil) label{font-size:.78rem;font-weight:600;color:#3f5e49;margin-bottom:8px}
+:is(#page-login,#page-cadastro,#page-perfil) input:not([type=checkbox]){width:100%;min-height:47px;border:1px solid #cfdbd1;border-radius:6px;background:#fbfdfb;color:#254735;font-size:.85rem;padding:12px 13px;box-shadow:none}
+:is(#page-login,#page-cadastro,#page-perfil) input::placeholder{color:#84958a}
+:is(#page-login,#page-cadastro,#page-perfil) input:focus{outline:2px solid #38795c;outline-offset:2px;border-color:#38795c;background:#fff}
+:is(#page-login,#page-cadastro,#page-perfil) .password-field input{padding-right:82px}
+:is(#page-login,#page-cadastro,#page-perfil) .password-field button{color:#50765a;font-size:.68rem;padding:8px;cursor:pointer;right:6px}
+:is(#page-login,#page-cadastro,#page-perfil) .form-group small{font-size:.68rem;line-height:1.65;color:#758578;display:block;margin-top:7px}
+#page-cadastro .form-group small.requirement-met{color:#226844}
+#page-cadastro input[aria-invalid=true]{border-color:#b74332}
+:is(#page-login,#page-cadastro) .auth-submit{width:100%;margin-top:9px;cursor:pointer}
+:is(#page-login,#page-cadastro) .auth-bottom{font-size:.74rem;margin-top:26px;padding-top:20px;border-color:#e1e9e2;color:#718276}
+.auth-bottom a{font-weight:600;color:#2b6946;text-underline-offset:3px}
+:is(#page-login,#page-cadastro) .field-feedback{font-size:.76rem;line-height:1.7;color:#8c382b;margin:14px 0 0;min-height:0}
+:is(#page-login,#page-cadastro) .field-feedback:empty{display:none}
+#page-cadastro .privacy-check{align-items:flex-start;font-size:.67rem;font-weight:400;color:#748477;line-height:1.8;gap:10px;margin:23px 0}
+#page-cadastro .privacy-check input{margin-top:4px;accent-color:#276a4a}
+#page-cadastro .privacy-check a{color:#346a49}
+#page-cadastro .account-privacy{border-color:#88b59a;border-radius:0 8px 8px 0;background:#ffffff08;color:#d2e7d9;padding:17px 19px;margin:27px 0 0}
+#page-cadastro .account-privacy strong{font-size:.78rem;font-weight:600}
+#page-cadastro .account-privacy p{font-size:.74rem;color:#b7cfc0;line-height:1.85;margin:9px 0 0}
+#page-perfil #profileAuthenticated{max-width:1080px;margin:0 auto}
+#page-perfil .account-header{background:#103b35;color:#f5faf6;border:1px solid #285345;border-radius:12px;padding:32px;box-shadow:none;position:relative;overflow:hidden;display:flex;gap:21px;align-items:center}
+#page-perfil .account-header .avatar{background:#c3e2cd;color:#274c37;width:65px;height:65px;border-radius:16px;font-weight:550;font-size:1.3rem}
+#page-perfil .account-header .eyebrow{color:#acd2b8;font-size:.57rem}
+#page-perfil .account-header h1{color:#f4faf3;font-size:1.9rem!important;line-height:1.2;margin:8px 0;font-weight:550;overflow-wrap:anywhere}
+#page-perfil .account-header p{color:#b7cebf;font-size:.78rem;margin:0;overflow-wrap:anywhere}
+#page-perfil #logout{background:transparent;color:#d9ecdf;border-color:#729784;min-height:42px;font-size:.73rem;padding:10px 17px;cursor:pointer}
+#page-perfil #logout:hover{background:#ffffff0c}
+#page-perfil .profile-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:21px 0 29px}
+#page-perfil .profile-metrics>div{padding:20px 22px;border:1px solid #dce6dc;border-radius:9px;background:#fff;min-width:0;position:relative}
+#page-perfil .profile-metrics>div::before{content:"";position:absolute;top:21px;right:18px;width:6px;height:6px;background:#759887;border-radius:50%}
+#page-perfil .profile-metrics>div:nth-child(2)::before{background:#be9241}
+#page-perfil .profile-metrics>div:nth-child(3)::before{background:#4d8a62}
+#page-perfil .profile-metrics>div:nth-child(4)::before{background:#b87968}
+#page-perfil .profile-metrics small{color:#708273;font-size:.68rem;padding-right:9px}
+#page-perfil .profile-metrics strong{color:#214b38;font-size:2rem;font-weight:500;margin-top:9px}
+#page-perfil .profile-tabs{display:inline-flex;border:1px solid #d9e4d9;border-radius:8px;padding:4px;background:#eaf0e9;gap:3px;margin:0 0 20px;max-width:100%}
+#page-perfil .profile-tabs button{border:0;border-radius:5px;padding:11px 20px;background:transparent;font-size:.76rem;color:#6b7e6e;cursor:pointer;white-space:normal}
+#page-perfil .profile-tabs button.active{background:#fff;color:#295f3f;box-shadow:0 1px 4px #214b3812;font-weight:600}
+#page-perfil :is(#profileHistory,#profileAccount){background:#fff;padding:29px 30px;border:1px solid #dce6dc;border-radius:10px;box-shadow:none}
+#page-perfil :is(#profileHistory,#profileAccount) h2{font-size:1.4rem;letter-spacing:-.03em;font-weight:600;color:#294d38;margin:0}
+#page-perfil :is(#profileHistory,#profileAccount)>.eyebrow{display:block;margin-bottom:11px}
+#page-perfil :is(#profileHistory,#profileAccount) p{color:#6c8070;font-size:.79rem;line-height:1.8}
+#page-perfil .panel-title-row{gap:18px}
+#page-perfil .panel-title-row p{font-size:.75rem}
+#page-perfil .panel-title-row .btn{font-size:.74rem;min-height:42px;padding:10px 16px}
+#page-perfil .my-occurrence{padding:24px 0;border-color:#e6ede5}
+#page-perfil .my-occurrence .eyebrow{font-size:.56rem}
+#page-perfil .my-occurrence h3{font-size:1.08rem;margin:8px 0 5px;font-weight:600;overflow-wrap:anywhere}
+#page-perfil .my-occurrence h3 a{text-decoration:none;color:#315d40}
+#page-perfil .my-occurrence h3 a:hover{text-decoration:underline}
+#page-perfil .decision-badge{font-size:.63rem;padding:5px 9px;border-radius:5px}
+#page-perfil .moderation-note{background:#f3f7f1;border:1px solid #e5ece1;padding:14px 17px;border-radius:7px;font-size:.75rem;color:#55735a}
+#page-perfil .moderation-note p{font-size:.73rem;margin:5px 0}
+#page-perfil .profile-empty{padding:42px 20px;background:#f8faf6;border:1px dashed #dce6d6;border-radius:9px;margin-top:25px}
+#page-perfil .profile-empty::before{content:"＋";width:45px;height:45px;display:grid;place-items:center;margin:0 auto 18px;border-radius:50%;background:#eaf2e5;color:#56805a;font-size:1.5rem;font-weight:400}
+#page-perfil .profile-empty h3{font-size:1.15rem;font-weight:600;color:#31553c;margin:0 0 10px}
+#page-perfil .profile-empty p{max-width:480px;font-size:.77rem;margin-bottom:22px}
+#page-perfil #profileEditForm{margin-top:25px}
+#page-perfil #profileEditMessage{font-size:.76rem;color:#2a6847}
+:is(#page-perfil,#page-login,#page-cadastro) :focus-visible{outline:3px solid #c59835;outline-offset:4px}
+@media(max-width:900px){#page-perfil .guest-account{grid-template-columns:1fr 1fr}.guest-welcome{padding:32px 28px}.guest-overview{padding:36px 28px}.guest-cta{flex-direction:column;width:100%}.guest-cta .btn{width:100%}:is(#page-login,#page-cadastro) .auth-panel{padding:32px 28px}:is(#page-login,#page-cadastro) .account-intro{padding:35px 28px}:is(#page-login,#page-cadastro) .account-intro h1{font-size:2.05rem}#page-perfil .profile-metrics>div{padding:18px 16px}}
+@media(max-width:700px){:is(#page-perfil,#page-login,#page-cadastro)>.container{padding-top:27px;padding-bottom:32px}#page-perfil .guest-account{grid-template-columns:1fr;border-radius:11px}.guest-welcome{padding:30px 25px}.account-symbol{width:43px;height:43px;border-radius:11px;margin-bottom:25px}.account-symbol svg{width:26px;height:26px}#page-perfil .guest-welcome h1{font-size:2.15rem;margin-top:19px}#page-perfil .guest-welcome p{font-size:.82rem;margin-bottom:24px}.guest-cta{flex-direction:row;gap:9px}.guest-cta .btn{flex:1;min-width:0;width:auto;font-size:.72rem!important;padding:11px 13px;gap:8px}.account-caption{font-size:.6rem}.guest-overview{padding:29px 25px}.guest-overview h2{font-size:1.5rem}.account-benefits li{gap:13px;padding:18px 0}:is(#page-login,#page-cadastro) .account-layout{grid-template-columns:1fr;border-radius:11px}:is(#page-login,#page-cadastro) .account-intro{padding:28px 26px}:is(#page-login,#page-cadastro) .account-intro .account-symbol{display:none}:is(#page-login,#page-cadastro) .account-intro h1{font-size:1.95rem;margin:17px 0}:is(#page-login,#page-cadastro) .account-intro ul{display:none}:is(#page-login,#page-cadastro) .account-intro>p{font-size:.78rem}:is(#page-login,#page-cadastro) .account-intro>a{font-size:.68rem;margin-top:20px}#page-cadastro .account-privacy{margin:19px 0 0;padding:13px 16px}:is(#page-login,#page-cadastro) .auth-panel{padding:27px 25px}.account-back{margin-bottom:25px}:is(#page-login,#page-cadastro) .auth-panel h2{font-size:1.6rem}#page-perfil .account-header{padding:24px 22px;gap:16px;flex-wrap:wrap}#page-perfil .account-header .avatar{width:52px;height:52px;flex:0 0 52px;border-radius:13px;font-size:1.1rem}#page-perfil .account-header h1{font-size:1.45rem!important}#page-perfil .account-header p{font-size:.7rem}#page-perfil #logout{width:100%;margin-top:7px}#page-perfil .profile-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0 22px}#page-perfil .profile-metrics small{font-size:.63rem}#page-perfil .profile-tabs{display:flex}#page-perfil .profile-tabs button{flex:1;padding:10px;font-size:.69rem}#page-perfil :is(#profileHistory,#profileAccount){padding:23px 20px}#page-perfil .panel-title-row{flex-direction:column;align-items:flex-start}#page-perfil .panel-title-row .btn{width:100%}#page-perfil .my-occurrence-heading{flex-direction:column;gap:12px}#page-perfil .profile-empty{padding:29px 15px}#page-perfil .profile-empty .btn{width:100%;font-size:.72rem}#page-perfil .profile-empty h3{font-size:1.04rem}}
+@media(max-width:359px){.guest-cta{flex-direction:column}.guest-cta .btn{width:100%}#page-perfil .guest-welcome h1{font-size:1.9rem}.guest-overview,.guest-welcome{padding-left:21px;padding-right:21px}}

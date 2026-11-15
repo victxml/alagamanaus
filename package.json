@@ -1,7 +1,7 @@
 {
   "name": "alagamanaus",
   "version": "1.1.0",
-  "description": "Sistema georreferenciado de ocorrências urbanas, moderação e criticidade de Manaus",
+  "description": "Sistema georreferenciado de ocorr\u00eancias urbanas, modera\u00e7\u00e3o e criticidade de Manaus",
   "scripts": {
     "start": "node --env-file-if-exists=.env backend/server.js",
     "test": "node --test tests/*.test.js"
